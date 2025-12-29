@@ -132,7 +132,7 @@ export class RaceEngine {
 
       // Update position (velocity is in pixels per frame, convert to percentage)
       // Scale factor controls race speed - lower means slower race
-      const distancePerFrame = velocity * 0.0003;
+      const distancePerFrame = velocity * 0.00002;
       horsePos.position += distancePerFrame;
       horsePos.velocity = velocity;
 

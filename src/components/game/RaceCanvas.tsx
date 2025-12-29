@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Application, Graphics, Text, Container } from 'pixi.js';
+import { Application, Graphics, Text, Container, Sprite, Texture, Assets } from 'pixi.js';
 import { RaceEngine } from '@/game/engine/RaceEngine';
 
 interface RaceCanvasProps {
@@ -9,7 +9,7 @@ interface RaceCanvasProps {
 export function RaceCanvas({ raceEngine }: RaceCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const appRef = useRef<Application | null>(null);
-  const horseSpritesRef = useRef<Map<string, Graphics>>(new Map());
+  const horseSpritesRef = useRef<Map<string, Container>>(new Map());
   const raceEngineRef = useRef<RaceEngine | null>(null);
   const unsubscribeRef = useRef<(() => void) | null>(null);
   const isAppInitializedRef = useRef(false);
@@ -53,7 +53,6 @@ export function RaceCanvas({ raceEngine }: RaceCanvasProps) {
     async function init() {
       // Ensure dimensions are valid and reasonable
       if (dimensions.width <= 0 || dimensions.height <= 0) {
-        console.log('[RaceCanvas] Waiting for valid dimensions...');
         return;
       }
 
@@ -64,7 +63,6 @@ export function RaceCanvas({ raceEngine }: RaceCanvasProps) {
         return;
       }
 
-      console.log('[RaceCanvas] Initializing PixiJS app with dimensions:', dimensions);
       const app = new Application();
       appRef.current = app;
 
@@ -83,7 +81,6 @@ export function RaceCanvas({ raceEngine }: RaceCanvasProps) {
           return;
         }
 
-        console.log('[RaceCanvas] PixiJS app initialized successfully');
         // Create track background
         createTrackBackground(app, app.stage);
 
@@ -134,40 +131,34 @@ export function RaceCanvas({ raceEngine }: RaceCanvasProps) {
   // Separate effect to handle raceEngine changes without cleanup
   useEffect(() => {
     const app = appRef.current;
-    console.log('[RaceCanvas] raceEngine effect - app:', !!app, 'raceEngine:', !!raceEngineRef.current, 'initialized:', isAppInitialized);
     
     if (!app || !raceEngineRef.current || !isAppInitialized) {
-      console.log('[RaceCanvas] Cannot setup - missing dependencies');
       return;
     }
 
     const engine = raceEngineRef.current;
-    console.log('[RaceCanvas] Setting up horse sprites');
 
     // Subscribe to engine updates
-    const unsubscribe = engine.addFrameListener((frame) => {
+    const unsubscribe = engine.addFrameListener(async (frame) => {
       const trackPadding = 100;
       const trackWidth = app.screen.width - trackPadding * 2;
       
       // Create horse sprites on first frame update if not already created
       if (horseSpritesRef.current.size === 0 && frame.positions.length > 0) {
-        console.log('[RaceCanvas] Creating horse sprites on first frame...');
-        const sprites = createHorseSprites(app, engine);
+        const sprites = await createHorseSprites(app, engine);
         horseSpritesRef.current = sprites;
-        console.log('[RaceCanvas] Created', sprites.size, 'horse sprites');
       }
       
       // Update sprite positions
       frame.positions.forEach((pos) => {
-        const horseSprite = horseSpritesRef.current.get(pos.horseId);
-        if (horseSprite) {
-          horseSprite.x = trackPadding + pos.position * trackWidth;
+        const horseContainer = horseSpritesRef.current.get(pos.horseId);
+        if (horseContainer) {
+          horseContainer.x = trackPadding + pos.position * trackWidth;
         }
       });
     });
 
     unsubscribeRef.current = unsubscribe;
-    console.log('[RaceCanvas] Subscribed to engine updates');
 
     return () => {
       unsubscribe();
@@ -209,8 +200,70 @@ function createTrackBackground(app: Application, stage: Container) {
   stage.addChild(graphics);
 }
 
-function createHorseSprites(app: Application, raceEngine: RaceEngine): Map<string, Graphics> {
-  const spriteMap = new Map<string, Graphics>();
+/**
+ * Generate an SVG string for a horse
+ */
+function generateHorseSVG(color: string): string {
+  return `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 80" width="100" height="80">
+      <!-- Body -->
+      <ellipse cx="50" cy="45" rx="35" ry="20" fill="${color}" />
+      <!-- Head -->
+      <ellipse cx="85" cy="30" rx="15" ry="12" fill="${color}" />
+      <!-- Neck -->
+      <path d="M 75 40 Q 80 35 85 30 L 75 45 Z" fill="${color}" />
+      <!-- Ear -->
+      <path d="M 80 20 L 85 15 L 90 20 Z" fill="${color}" />
+      <!-- Eye -->
+      <circle cx="90" cy="28" r="2" fill="#000000" />
+      <!-- Front leg -->
+      <rect x="70" y="55" width="8" height="20" rx="3" fill="${color}" />
+      <!-- Front leg 2 -->
+      <rect x="80" y="55" width="8" height="20" rx="3" fill="${color}" />
+      <!-- Back leg -->
+      <rect x="20" y="55" width="8" height="20" rx="3" fill="${color}" />
+      <!-- Back leg 2 -->
+      <rect x="30" y="55" width="8" height="20" rx="3" fill="${color}" />
+      <!-- Tail -->
+      <path d="M 15 45 Q 5 50 8 60 Q 10 55 15 50" fill="${color}" />
+      <!-- Mane -->
+      <path d="M 70 25 Q 75 20 80 22 Q 78 28 75 30 Q 72 28 70 25" fill="${color}" />
+    </svg>
+  `;
+}
+
+/**
+ * Convert SVG string to PixiJS Texture using Assets API
+ */
+async function svgToTexture(svg: string, assetId: string): Promise<Texture> {
+  const blob = new Blob([svg], { type: 'image/svg+xml' });
+  const url = URL.createObjectURL(blob);
+  
+  // Load the asset through Assets API with the URL
+  const texture = await Assets.load<Texture>(url);
+  
+  return texture;
+}
+
+/**
+ * Generate a color for a horse based on its index
+ */
+function getHorseColor(index: number): string {
+  const colors = [
+    '#8B4513', // Saddle Brown
+    '#000000', // Black
+    '#FFFFFF', // White
+    '#808080', // Gray
+    '#D2691E', // Chocolate
+    '#F5DEB3', // Wheat
+    '#A0522D', // Sienna
+    '#696969', // Dim Gray
+  ];
+  return colors[index % colors.length];
+}
+
+async function createHorseSprites(app: Application, raceEngine: RaceEngine): Promise<Map<string, Container>> {
+  const spriteMap = new Map<string, Container>();
   const stage = app.stage;
 
   const positions = raceEngine.getCurrentPositions();
@@ -219,29 +272,53 @@ function createHorseSprites(app: Application, raceEngine: RaceEngine): Map<strin
   const startY = (app.screen.height - (laneCount * laneHeight)) / 2;
   const trackPadding = 100;
 
-  positions.forEach((pos, index) => {
-    const graphics = new Graphics();
-    graphics.roundRect(-30, -20, 60, 40, 5); // Center the horse
-    graphics.fill(0xff6b6b);
+  for (const [index, pos] of positions.entries()) {
+    // Generate SVG for this horse
+    const horseColor = getHorseColor(index);
+    const svgString = generateHorseSVG(horseColor);
+    const assetId = `horse-${pos.horseId}`;
+    const texture = await svgToTexture(svgString, assetId);
+    
+    // Create a Container to hold both the sprite and text
+    const horseContainer = new Container();
+    
+    const sprite = new Sprite(texture);
+    
+    // Scale the sprite to fit in the lane
+    const targetWidth = 80;
+    const targetHeight = 60;
+    sprite.width = targetWidth;
+    sprite.height = targetHeight;
+    
+    // Set anchor to center for easier positioning
+    sprite.anchor.set(0.5);
+    sprite.x = 0;
+    sprite.y = 0;
 
-    // Initial position
-    graphics.x = trackPadding + pos.position * (app.screen.width - trackPadding * 2);
-    graphics.y = startY + index * laneHeight + laneHeight / 2;
-
+    // Add horse number label
     const text = new Text({
       text: `H${index + 1}`,
       style: {
-        fontSize: 12,
+        fontSize: 14,
         fill: 0xffffff,
+        fontWeight: 'bold',
       },
     });
     text.anchor.set(0.5);
-    text.y = -30;
-    graphics.addChild(text);
+    text.x = 0;
+    text.y = -targetHeight / 2 - 15;
 
-    stage.addChild(graphics);
-    spriteMap.set(pos.horseId, graphics);
-  });
+    // Add both sprite and text to the container
+    horseContainer.addChild(sprite);
+    horseContainer.addChild(text);
+
+    // Initial position
+    horseContainer.x = trackPadding + pos.position * (app.screen.width - trackPadding * 2);
+    horseContainer.y = startY + index * laneHeight + laneHeight / 2;
+
+    stage.addChild(horseContainer);
+    spriteMap.set(pos.horseId, horseContainer);
+  }
 
   return spriteMap;
 }
