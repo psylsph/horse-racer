@@ -26,16 +26,36 @@ export class RaceEngine {
   private frames: RaceFrame[] = [];
   private isRunning: boolean = false;
   private animationFrame: number | null = null;
-  private onFrameUpdate?: (frame: RaceFrame) => void;
-  private onComplete?: (results: RaceResult[]) => void;
+  private onFrameUpdates: ((frame: RaceFrame) => void)[] = [];
+  private onCompletes: ((results: RaceResult[]) => void)[] = [];
 
   constructor(race: Race, onFrameUpdate?: (frame: RaceFrame) => void, onComplete?: (results: RaceResult[]) => void) {
     this.race = race;
     this.horses = new Map(race.horses.map(h => [h.id, h]));
     this.positions = new Map();
     this.startTime = Date.now();
-    this.onFrameUpdate = onFrameUpdate;
-    this.onComplete = onComplete;
+    if (onFrameUpdate) this.onFrameUpdates.push(onFrameUpdate);
+    if (onComplete) this.onCompletes.push(onComplete);
+  }
+
+  /**
+   * Add a frame update listener
+   */
+  addFrameListener(callback: (frame: RaceFrame) => void): () => void {
+    this.onFrameUpdates.push(callback);
+    return () => {
+      this.onFrameUpdates = this.onFrameUpdates.filter(cb => cb !== callback);
+    };
+  }
+
+  /**
+   * Add a completion listener
+   */
+  addCompletionListener(callback: (results: RaceResult[]) => void): () => void {
+    this.onCompletes.push(callback);
+    return () => {
+      this.onCompletes = this.onCompletes.filter(cb => cb !== callback);
+    };
   }
 
   /**
@@ -43,7 +63,7 @@ export class RaceEngine {
    */
   start(): void {
     if (this.isRunning) return;
-    
+
     this.isRunning = true;
     this.initializePositions();
     this.simulate();
@@ -74,13 +94,11 @@ export class RaceEngine {
       const frame = this.calculateNextFrame();
       this.frames.push(frame);
 
-      if (this.onFrameUpdate) {
-        this.onFrameUpdate(frame);
-      }
+      this.onFrameUpdates.forEach(cb => cb(frame));
 
       // Check if all horses have finished
       const allFinished = Array.from(this.positions.values()).every(p => p.finished);
-      
+
       if (allFinished) {
         this.finishRace();
       } else {
@@ -97,7 +115,7 @@ export class RaceEngine {
   private calculateNextFrame(): RaceFrame {
     const currentTime = Date.now() - this.startTime;
     const positions = Array.from(this.positions.values());
-    
+
     // Update each horse's position
     positions.forEach(horsePos => {
       if (horsePos.finished) return;
@@ -111,10 +129,10 @@ export class RaceEngine {
 
       // Calculate current velocity
       const velocity = this.calculateVelocity(horse, horsePos, conditions);
-      
+
       // Update position (velocity is in pixels per frame, convert to percentage)
       // Increased scale factor for faster races
-      const distancePerFrame = velocity * 0.003; 
+      const distancePerFrame = velocity * 0.003;
       horsePos.position += distancePerFrame;
       horsePos.velocity = velocity;
 
@@ -129,7 +147,7 @@ export class RaceEngine {
     });
 
     // Find leader
-    const leader = positions.reduce((leader, pos) => 
+    const leader = positions.reduce((leader, pos) =>
       pos.position > leader.position ? pos : leader
     );
 
@@ -150,35 +168,35 @@ export class RaceEngine {
   ): number {
     // Base performance from stats
     let performance = (horse.topSpeed * 0.4) + (horse.acceleration * 0.3) + (horse.stamina * 0.3);
-    
+
     // Track surface modifier
     const surfaceBonus = this.getSurfaceBonus(horse.trackPreference, conditions.trackSurface);
     performance *= surfaceBonus;
-    
+
     // Weather modifier
     if (conditions.weather === 'rain') {
       performance *= (1 - (0.1 * (1 - horse.stamina / 100)));
     } else if (conditions.weather === 'muddy') {
       performance *= (1 - (0.15 * (1 - horse.acceleration / 100)));
     }
-    
+
     // Stochastic variance (reduced by consistency)
     const varianceRange = 20 * (1 - horse.consistency / 100);
     const randomFactor = (Math.random() - 0.5) * varianceRange;
-    
+
     // Apply variance to performance
     let velocity = performance + randomFactor;
-    
+
     // Apply stamina fade in final 25% of race
     const fadeFactor = this.applyStaminaFade(horse, horsePos.position);
     velocity *= fadeFactor;
-    
+
     // Acceleration phase (first 10% of race)
     if (horsePos.position < 0.1) {
       const accelProgress = horsePos.position / 0.1;
       velocity *= accelProgress;
     }
-    
+
     return Math.max(0, velocity);
   }
 
@@ -187,11 +205,11 @@ export class RaceEngine {
    */
   private applyStaminaFade(horse: Horse, progress: number): number {
     if (progress < 0.75) return 1.0;
-    
+
     const fadeFactor = (progress - 0.75) / 0.25; // 0 to 1
     const staminaDrain = 1 - (horse.stamina / 200); // 0.5 to 1.0
     const fade = 1 - (fadeFactor * staminaDrain * 0.3); // Max 30% fade
-    
+
     return fade;
   }
 
@@ -202,7 +220,7 @@ export class RaceEngine {
     // Stamina drains linearly over the race
     const drainRate = 0.3; // 30% stamina drain over full race
     const currentStamina = horse.stamina * (1 - (progress * drainRate));
-    
+
     return currentStamina;
   }
 
@@ -216,7 +234,7 @@ export class RaceEngine {
     if (preference === surface) {
       return 1.1; // 10% bonus on preferred surface
     }
-    
+
     const penalties: Record<string, number> = {
       'firm-firm': 1.0,
       'firm-soft': 0.95,
@@ -228,7 +246,7 @@ export class RaceEngine {
       'heavy-soft': 0.95,
       'heavy-heavy': 1.0,
     };
-    
+
     return penalties[`${preference}-${surface}`] || 1.0;
   }
 
@@ -237,7 +255,7 @@ export class RaceEngine {
    */
   private finishRace(): void {
     this.isRunning = false;
-    
+
     if (this.animationFrame) {
       cancelAnimationFrame(this.animationFrame);
       this.animationFrame = null;
@@ -253,9 +271,7 @@ export class RaceEngine {
         finalSpeed: pos.velocity,
       }));
 
-    if (this.onComplete) {
-      this.onComplete(results);
-    }
+    this.onCompletes.forEach(cb => cb(results));
   }
 
   /**
@@ -263,7 +279,7 @@ export class RaceEngine {
    */
   stop(): void {
     this.isRunning = false;
-    
+
     if (this.animationFrame) {
       cancelAnimationFrame(this.animationFrame);
       this.animationFrame = null;
@@ -276,7 +292,7 @@ export class RaceEngine {
   getProgress(): number {
     const positions = Array.from(this.positions.values());
     if (positions.length === 0) return 0;
-    
+
     const avgPosition = positions.reduce((sum, pos) => sum + pos.position, 0) / positions.length;
     return avgPosition;
   }
