@@ -87,6 +87,11 @@ export function generateUpcomingRaces(horses: Horse[], count: number): Race[] {
   const races: Race[] = [];
   const now = Date.now();
   
+  // In test mode, make races ready immediately
+  const isTestMode = process.env.NODE_ENV === 'test';
+  const baseStartTime = isTestMode ? now : now + 30000;
+  const staggerTime = isTestMode ? 1000 : 120000;
+  
   for (let i = 0; i < count; i++) {
     // Shuffle horses for each race
     const shuffledHorses = [...horses].sort(() => Math.random() - 0.5);
@@ -94,8 +99,8 @@ export function generateUpcomingRaces(horses: Horse[], count: number): Race[] {
     
     const race = generateRace(raceHorses);
     
-    // Stagger start times (every 2 minutes)
-    race.startTime = now + (i * 120000) + 30000;
+    // Stagger start times
+    race.startTime = baseStartTime + (i * staggerTime);
     
     races.push(race);
   }

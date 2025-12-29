@@ -30,7 +30,12 @@ export function RaceCard({ race, onSelect }: RaceCardProps) {
   }, [race.startTime, isReady]);
 
   return (
-    <Card variant="elevated" className="hover:border-turf-500 transition-colors cursor-pointer">
+    <Card
+      variant="elevated"
+      className="hover:border-turf-500 transition-colors cursor-pointer"
+      data-testid="race-card"
+      data-race-id={race.id}
+    >
       <CardHeader className="flex items-start justify-between">
         <div>
           <CardTitle className="text-turf-400">Race #{race.id.slice(-4)}</CardTitle>

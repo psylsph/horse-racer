@@ -32,7 +32,7 @@ export function Form({ race }: FormProps) {
             {race.distance}m • {race.trackSurface} • {race.weather}
           </p>
         </div>
-        <Button variant="secondary" onClick={handleBack}>
+        <Button variant="secondary" onClick={handleBack} data-testid="back-button">
           ← Back to Lobby
         </Button>
       </div>
@@ -42,26 +42,32 @@ export function Form({ race }: FormProps) {
           const odds = calculateOdds(horse, race);
           
           return (
-            <Card key={horse.id} variant="elevated" className="hover:border-turf-500 transition-colors">
+            <Card
+              key={horse.id}
+              variant="elevated"
+              className="hover:border-turf-500 transition-colors"
+              data-testid="horse-card"
+              data-horse-id={horse.id}
+            >
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
-                    <div 
+                    <div
                       className="w-12 h-12 rounded-full border-2 border-white/20"
                       style={{ backgroundColor: horse.color }}
                     />
                     <div>
-                      <CardTitle className="text-lg">{horse.name}</CardTitle>
+                      <CardTitle className="text-lg" data-testid="horse-name">{horse.name}</CardTitle>
                       <p className="text-xs text-slate-400">
                         {horse.totalRaces} races • {Math.round(horse.winRate * 100)}% win rate
                       </p>
                     </div>
                   </div>
-                  <Badge variant="gold">{formatOdds(odds)}</Badge>
+                  <Badge variant="gold" data-testid="odds-badge">{formatOdds(odds)}</Badge>
                 </div>
               </CardHeader>
               
-              <CardContent>
+              <CardContent data-testid="horse-stats">
                 <div className="space-y-3">
                   <div>
                     <div className="flex justify-between text-xs text-slate-400 mb-1">
@@ -109,7 +115,7 @@ export function Form({ race }: FormProps) {
 
       <div className="fixed bottom-16 left-0 right-0 bg-slate-900/95 backdrop-blur-sm border-t border-slate-800 p-4">
         <div className="container mx-auto flex justify-center">
-          <Button variant="primary" size="lg" onClick={handleStartRace}>
+          <Button variant="primary" size="lg" onClick={handleStartRace} data-testid="start-race-button">
             Start Race 🏁
           </Button>
         </div>

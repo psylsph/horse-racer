@@ -32,3 +32,6 @@ dist-ssr
 # Build output
 build
 out
+
+# Miscellaneous
+playwright-report

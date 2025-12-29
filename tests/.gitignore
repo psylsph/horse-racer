@@ -1,0 +1,13 @@
+# Test results
+test-results/
+playwright-report/
+screenshots/
+videos/
+
+# Coverage
+coverage/
+.nyc_output/
+
+# Temporary test files
+*.tmp
+*.temp

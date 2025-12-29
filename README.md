@@ -23,7 +23,7 @@ A browser-based, 2D side-scrolling horse racing game with an integrated betting 
 
 ### Prerequisites
 
-- Node.js 18+ 
+- Node.js 18+
 - npm or yarn
 
 ### Installation
@@ -31,6 +31,9 @@ A browser-based, 2D side-scrolling horse racing game with an integrated betting 
 ```bash
 # Install dependencies
 npm install
+
+# Install Playwright browsers (required for testing)
+npm run test:install
 
 # Start development server
 npm run dev
@@ -45,6 +48,90 @@ npm run preview
 ### Development
 
 The development server will start at `http://localhost:3000`
+
+## Testing
+
+This project uses Playwright for end-to-end testing.
+
+### Running Tests
+
+```bash
+# Run all tests
+npm test
+
+# Run tests in headed mode (show browser)
+npm run test:headed
+
+# Run tests with UI mode
+npm run test:ui
+
+# Run tests in debug mode
+npm run test:debug
+
+# View test report
+npm run test:report
+```
+
+### Test Structure
+
+```
+tests/
+├── e2e/                    # End-to-end tests
+│   ├── lobby.spec.ts       # Lobby screen tests
+│   ├── form.spec.ts        # Form screen tests
+│   ├── race.spec.ts        # Race screen tests
+│   ├── results.spec.ts     # Results screen tests
+│   └── full-flow.spec.ts   # Full user flow tests
+├── helpers/               # Test helpers and utilities
+│   ├── test-utils.ts      # Common test utilities
+│   └── page-objects/     # Page object models
+│       ├── LobbyPage.ts
+│       ├── FormPage.ts
+│       └── RacePage.ts
+├── global-setup.ts        # Global test setup
+└── global-teardown.ts     # Global test teardown
+```
+
+### Test Coverage
+
+The test suite covers:
+- **Lobby Screen**: Race card rendering, navigation, race selection
+- **Form Screen**: Horse stats display, odds calculation, race details
+- **Race Screen**: Race simulation, progress tracking, race completion
+- **Results Screen**: Results display
+- **Full Flow**: Complete user journeys from lobby to results
+- **Responsive Design**: Testing across different viewport sizes
+- **Accessibility**: ARIA attributes and semantic HTML
+- **State Management**: localStorage persistence and state transitions
+
+### Writing New Tests
+
+1. Create a new test file in `tests/e2e/`
+2. Import test utilities from `../helpers/test-utils`
+3. Use page objects from `../helpers/page-objects/`
+4. Follow the existing test patterns and naming conventions
+
+Example:
+
+```typescript
+import { test, expect } from '@playwright/test';
+import { clearLocalStorage, waitForAppLoad } from '../helpers/test-utils';
+
+test('should do something', async ({ page }) => {
+  await clearLocalStorage(page);
+  await page.goto('/');
+  await waitForAppLoad(page);
+  
+  // Your test assertions here
+});
+```
+
+### Debugging Tests
+
+- Use `npm run test:debug` to run tests with Playwright's inspector
+- Use `npm run test:ui` to run tests with a visual interface
+- Check `test-results/` for screenshots and videos of failed tests
+- View the HTML report with `npm run test:report`
 
 ## Project Structure
 

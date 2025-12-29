@@ -92,11 +92,11 @@ export function RaceView({ race }: RaceViewProps) {
               </div>
             )}
             {isFinished && (
-              <Badge variant="success">Finished!</Badge>
-            )}
-            <Button variant="secondary" onClick={handleBack}>
-              ← Back
-            </Button>
+              <Badge variant="success" data-testid="finished-badge">Finished!</Badge>
+              )}
+              <Button variant="secondary" onClick={handleBack} data-testid="back-button">
+                ← Back
+              </Button>
           </div>
         </div>
       </div>
@@ -107,7 +107,7 @@ export function RaceView({ race }: RaceViewProps) {
           <div className="flex items-center gap-4">
             <span className="text-sm text-slate-400 w-20">Progress</span>
             <div className="flex-1">
-              <Progress value={raceProgress * 100} max={100} variant="turf" showLabel />
+              <Progress value={raceProgress * 100} max={100} variant="turf" showLabel data-testid="progress-bar" />
             </div>
           </div>
         </div>
@@ -120,6 +120,7 @@ export function RaceView({ race }: RaceViewProps) {
             width={canvasRef.current?.clientWidth || 800}
             height={canvasRef.current?.clientHeight || 600}
             raceEngine={raceEngine}
+            data-testid="race-canvas"
           />
         )}
       </div>

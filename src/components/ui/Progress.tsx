@@ -43,7 +43,14 @@ export function Progress({
   };
   
   return (
-    <div className={clsx(baseStyles, sizeStyles[size], variantStyles[variant], className)} {...props}>
+    <div
+      className={clsx(baseStyles, sizeStyles[size], variantStyles[variant], className)}
+      {...props}
+      role="progressbar"
+      aria-valuenow={value}
+      aria-valuemin={0}
+      aria-valuemax={max}
+    >
       <div
         className={clsx(
           'h-full rounded-full transition-all duration-300 ease-out',
