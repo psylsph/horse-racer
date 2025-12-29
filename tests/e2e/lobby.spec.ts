@@ -121,11 +121,13 @@ test.describe('Lobby Screen', () => {
     });
     
     expect(localStorageData).toBeTruthy();
-    
+
     // Parse and verify
     const horses = JSON.parse(localStorageData || '{}');
-    expect(horses.state?.horses).toBeDefined();
-    expect(horses.state?.horses.length).toBeGreaterThan(0);
+    // Data may be stored with or without 'state' wrapper depending on persist version
+    const horseData = horses.state?.horses || (Array.isArray(horses) ? horses : null);
+    expect(horseData).toBeDefined();
+    expect(horseData.length).toBeGreaterThan(0);
   });
 
   test('should handle page reload gracefully', async ({ page }) => {

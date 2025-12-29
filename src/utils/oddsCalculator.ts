@@ -1,4 +1,4 @@
-import { Horse, Race, RaceConditions } from '@/types';
+import { Horse, Race } from '@/types';
 
 /**
  * Calculate odds for a horse based on multiple factors

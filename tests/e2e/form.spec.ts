@@ -27,10 +27,13 @@ test.describe('Form Screen', () => {
   });
 
   test('should display race details', async ({ page }) => {
-    const details = await formPage.getRaceDetails();
+    // Get details from first horse card
+    const firstHorseCard = page.locator('[data-testid="horse-card"]').first();
+    const titleText = await firstHorseCard.locator('h2').textContent();
+    const detailsText = await firstHorseCard.locator('p.text-slate-400').textContent();
 
-    expect(details.title).toContain('Race #');
-    expect(details.details).toBeTruthy();
+    expect(titleText).toContain('Race #');
+    expect(detailsText).toBeTruthy();
   });
 
   test('should display horse cards', async ({ page }) => {

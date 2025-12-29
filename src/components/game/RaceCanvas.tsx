@@ -183,8 +183,8 @@ function createTrackBackground(app: Application, stage: Container) {
   graphics.fill(0x22c55e);
 
   // Draw track lanes
-  const laneHeight = 60;
-  const laneCount = 8;
+    const laneHeight = 60;
+  const laneCount = 6;
   const startY = (app.screen.height - (laneCount * laneHeight)) / 2;
 
   for (let i = 0; i < laneCount; i++) {
@@ -232,18 +232,19 @@ function generateHorseSVG(color: string): string {
   `;
 }
 
-/**
- * Convert SVG string to PixiJS Texture using Assets API
- */
-async function svgToTexture(svg: string, assetId: string): Promise<Texture> {
-  const blob = new Blob([svg], { type: 'image/svg+xml' });
-  const url = URL.createObjectURL(blob);
-  
-  // Load the asset through Assets API with the URL
-  const texture = await Assets.load<Texture>(url);
-  
-  return texture;
-}
+  /**
+   * Convert SVG string to PixiJS Texture
+   */
+  async function svgToTexture(svg: string): Promise<Texture> {
+    // Convert SVG to base64 data URL
+    const base64 = btoa(svg);
+    const url = `data:image/svg+xml;base64,${base64}`;
+
+    // Load texture from URL
+    const texture = await Assets.load<Texture>(url);
+
+    return texture;
+  }
 
 /**
  * Generate a color for a horse based on its index
@@ -268,7 +269,7 @@ async function createHorseSprites(app: Application, raceEngine: RaceEngine): Pro
 
   const positions = raceEngine.getCurrentPositions();
   const laneHeight = 60;
-  const laneCount = 8;
+  const laneCount = 6;
   const startY = (app.screen.height - (laneCount * laneHeight)) / 2;
   const trackPadding = 100;
 
@@ -276,8 +277,7 @@ async function createHorseSprites(app: Application, raceEngine: RaceEngine): Pro
     // Generate SVG for this horse
     const horseColor = getHorseColor(index);
     const svgString = generateHorseSVG(horseColor);
-    const assetId = `horse-${pos.horseId}`;
-    const texture = await svgToTexture(svgString, assetId);
+    const texture = await svgToTexture(svgString);
     
     // Create a Container to hold both the sprite and text
     const horseContainer = new Container();

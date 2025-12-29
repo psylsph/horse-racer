@@ -1,6 +1,5 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import { Bet, BetType, Horse, Race, ValidationResult, ECONOMY_CONFIG } from '@/types';
+import { Bet, BetType, Race, ValidationResult, ECONOMY_CONFIG } from '@/types';
 import { betsStorage } from '@/utils/localStorage';
 
 interface BettingState {

@@ -128,7 +128,7 @@ export const progressStorage = {
     return progress;
   },
 
-  updateStatistics(win: boolean, betType: string, profit: number): UserProgress {
+  updateStatistics(win: boolean, profit: number): UserProgress {
     const progress = this.get();
     progress.statistics.totalBets += 1;
     progress.statistics.profit += profit;

@@ -36,6 +36,7 @@ export class RaceEngine {
     this.startTime = Date.now();
     if (onFrameUpdate) this.onFrameUpdates.push(onFrameUpdate);
     if (onComplete) this.onCompletes.push(onComplete);
+    this.initializePositions();
   }
 
   /**

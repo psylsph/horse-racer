@@ -95,7 +95,7 @@ export function generateUpcomingRaces(horses: Horse[], count: number): Race[] {
   for (let i = 0; i < count; i++) {
     // Shuffle horses for each race
     const shuffledHorses = [...horses].sort(() => Math.random() - 0.5);
-    const raceHorses = shuffledHorses.slice(0, 6 + Math.floor(Math.random() * 4)); // 6-10 horses
+    const raceHorses = shuffledHorses.slice(0, 6); // Fixed at 6 horses for mobile
     
     const race = generateRace(raceHorses);
     

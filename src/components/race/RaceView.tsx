@@ -21,7 +21,6 @@ export function RaceView({ race }: RaceViewProps) {
   const [isRunning, setIsRunning] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
   const canvasRef = useRef<HTMLDivElement>(null);
-  const renderCountRef = useRef(0);
 
   useEffect(() => {
     if (!race) return;
