@@ -1,17 +1,49 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Application, Graphics, Text, Container } from 'pixi.js';
 import { RaceEngine } from '@/game/engine/RaceEngine';
 
 interface RaceCanvasProps {
-  width: number;
-  height: number;
   raceEngine: RaceEngine | null;
 }
 
-export function RaceCanvas({ width, height, raceEngine }: RaceCanvasProps) {
+export function RaceCanvas({ raceEngine }: RaceCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const appRef = useRef<Application | null>(null);
   const horseSpritesRef = useRef<Map<string, Graphics>>(new Map());
+  const renderCountRef = useRef(0);
+  const raceEngineRef = useRef<RaceEngine | null>(null);
+  const unsubscribeRef = useRef<(() => void) | null>(null);
+  const isAppInitializedRef = useRef(false);
+  const isStrictModeUnmountRef = useRef(false);
+  const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
+
+  // Update the raceEngine ref whenever the prop changes
+  useEffect(() => {
+    raceEngineRef.current = raceEngine;
+  }, [raceEngine]);
+
+  // Track canvas dimensions using ResizeObserver
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const { width, height } = entry.contentRect;
+        // Ignore resize to 0x0 (happens during unmount)
+        if (width === 0 && height === 0) {
+          return;
+        }
+        setDimensions({ width, height });
+      }
+    });
+
+    resizeObserver.observe(canvas);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, []);
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -19,76 +51,132 @@ export function RaceCanvas({ width, height, raceEngine }: RaceCanvasProps) {
     let isMounted = true;
 
     async function init() {
-      console.log('[RaceCanvas] Initializing PixiJS app...');
-
-      const app = new Application();
-      appRef.current = app;
-
-      await app.init({
-        width,
-        height,
-        canvas: canvasRef.current!,
-        backgroundColor: 0x1a1a2e,
-        antialias: true,
-        resolution: window.devicePixelRatio || 1,
-      });
-
-      if (!isMounted) {
-        app.destroy({ removeView: true });
+      // Ensure dimensions are valid and reasonable
+      if (dimensions.width <= 0 || dimensions.height <= 0) {
+        console.log('[RaceCanvas] Waiting for valid dimensions...');
         return;
       }
 
-      console.log('[RaceCanvas] App initialized');
+      // Add a small delay to ensure DOM is ready
+      await new Promise(resolve => setTimeout(resolve, 100));
 
-      // Create track background
-      createTrackBackground(app, app.stage);
+      if (!isMounted || !canvasRef.current) {
+        return;
+      }
 
-      // Create horse sprites
-      if (raceEngine) {
-        const sprites = createHorseSprites(app, raceEngine);
-        horseSpritesRef.current = sprites;
+      console.log('[RaceCanvas] Initializing PixiJS app with dimensions:', dimensions);
+      const app = new Application();
+      appRef.current = app;
 
-        // Subscribe to engine updates
-        const unsubscribe = raceEngine.addFrameListener((frame) => {
-          if (!isMounted) return;
-
-          frame.positions.forEach((pos) => {
-            const sprite = horseSpritesRef.current.get(pos.horseId);
-            if (sprite) {
-              // Update horse X position based on progress (0-1)
-              // Track width is screen width minus some padding
-              const trackPadding = 100;
-              const trackWidth = app.screen.width - trackPadding * 2;
-              sprite.x = trackPadding + pos.position * trackWidth;
-            }
-          });
+      try {
+        await app.init({
+          width: dimensions.width,
+          height: dimensions.height,
+          canvas: canvasRef.current!,
+          backgroundColor: 0x1a1a2e,
+          antialias: false, // Disable antialias to avoid shader issues
+          resolution: 1, // Use fixed resolution to avoid issues
         });
 
-        return () => {
-          unsubscribe();
-        };
+        if (!isMounted) {
+          app.destroy({ removeView: true });
+          return;
+        }
+
+        console.log('[RaceCanvas] PixiJS app initialized successfully');
+        // Create track background
+        createTrackBackground(app, app.stage);
+
+        isAppInitializedRef.current = true;
+      } catch (error) {
+        console.error('[RaceCanvas] Failed to initialize PixiJS app:', error);
+        // Try to clean up on error
+        if (appRef.current) {
+          try {
+            appRef.current.destroy({ removeView: true });
+          } catch (e) {
+            console.error('[RaceCanvas] Error during cleanup:', e);
+          }
+          appRef.current = null;
+        }
       }
     }
 
     const cleanupPromise = init();
 
+    // Only cleanup on actual unmount, not on prop changes
     return () => {
       isMounted = false;
+      isStrictModeUnmountRef.current = true;
+      
+      // Unsubscribe from engine updates if any
+      if (unsubscribeRef.current) {
+        unsubscribeRef.current();
+        unsubscribeRef.current = null;
+      }
+      
       cleanupPromise.then(() => {
         if (appRef.current) {
-          console.log('[RaceCanvas] Cleanup: Destroying app...');
-          appRef.current.destroy({ removeView: true });
           appRef.current = null;
         }
+        isAppInitializedRef.current = false;
       });
+      
+      // Reset strict mode flag after a short delay to allow remount
+      setTimeout(() => {
+        isStrictModeUnmountRef.current = false;
+      }, 100);
     };
-  }, [width, height, raceEngine]);
+  }, []); // Empty dependency array - only run once on mount
+
+  // Separate effect to handle raceEngine changes without cleanup
+  useEffect(() => {
+    const app = appRef.current;
+    console.log('[RaceCanvas] raceEngine effect - app:', !!app, 'raceEngine:', !!raceEngineRef.current, 'initialized:', isAppInitializedRef.current);
+    
+    if (!app || !raceEngineRef.current || !isAppInitializedRef.current) {
+      console.log('[RaceCanvas] Cannot setup - missing dependencies');
+      return;
+    }
+
+    const engine = raceEngineRef.current;
+    console.log('[RaceCanvas] Setting up horse sprites');
+
+    // Create horse sprites if not already created
+    if (horseSpritesRef.current.size === 0) {
+      console.log('[RaceCanvas] Creating horse sprites...');
+      const sprites = createHorseSprites(app, engine);
+      horseSpritesRef.current = sprites;
+      console.log('[RaceCanvas] Created', sprites.size, 'horse sprites');
+    } else {
+      console.log('[RaceCanvas] Horse sprites already exist:', horseSpritesRef.current.size);
+    }
+
+    // Subscribe to engine updates
+    const unsubscribe = engine.addFrameListener((frame) => {
+      const trackPadding = 100;
+      const trackWidth = app.screen.width - trackPadding * 2;
+      frame.positions.forEach((pos) => {
+        const horseSprite = horseSpritesRef.current.get(pos.horseId);
+        if (horseSprite) {
+          horseSprite.x = trackPadding + pos.position * trackWidth;
+        }
+      });
+    });
+
+    unsubscribeRef.current = unsubscribe;
+    console.log('[RaceCanvas] Subscribed to engine updates');
+
+    return () => {
+      unsubscribe();
+      unsubscribeRef.current = null;
+    };
+  }, [raceEngine]); // This effect runs when raceEngine changes
 
   return (
     <canvas
       ref={canvasRef}
       className="w-full h-full block"
-      style={{ width, height }}
     />
   );
 }

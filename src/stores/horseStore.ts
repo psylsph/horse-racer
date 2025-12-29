@@ -45,7 +45,11 @@ export const useHorseStore = create<HorseState>()(
           ),
         }));
         
-        horsesStorage.update(horseId, updates);
+        // Only update localStorage if horse exists there and horses is an array
+        const horses = horsesStorage.get();
+        if (Array.isArray(horses) && horses.find(h => h.id === horseId)) {
+          horsesStorage.update(horseId, updates);
+        }
       },
 
       getHorseById: (horseId) => {
@@ -76,7 +80,10 @@ export const useHorseStore = create<HorseState>()(
 
       updateHorseStats: (horseId, position) => {
         const horse = get().getHorseById(horseId);
-        if (!horse) return;
+        if (!horse) {
+          console.log(`[HorseStore] Horse ${horseId} not found in store, skipping stats update`);
+          return;
+        }
         
         const newRaceResult = {
           horseId,

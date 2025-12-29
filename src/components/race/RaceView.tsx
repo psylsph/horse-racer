@@ -21,6 +21,7 @@ export function RaceView({ race }: RaceViewProps) {
   const [isRunning, setIsRunning] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
   const canvasRef = useRef<HTMLDivElement>(null);
+  const renderCountRef = useRef(0);
 
   useEffect(() => {
     if (!race) return;
@@ -50,6 +51,10 @@ export function RaceView({ race }: RaceViewProps) {
     );
     
     setRaceEngine(engine);
+
+    return () => {
+      // Cleanup
+    };
   }, [race, setCurrentScreen, updateHorseStats]);
 
   const handleStartRace = () => {
@@ -115,14 +120,10 @@ export function RaceView({ race }: RaceViewProps) {
 
       {/* Race Canvas */}
       <div className="flex-1 relative" ref={canvasRef}>
-        {raceEngine && (
-          <RaceCanvas
-            width={canvasRef.current?.clientWidth || 800}
-            height={canvasRef.current?.clientHeight || 600}
-            raceEngine={raceEngine}
-            data-testid="race-canvas"
-          />
-        )}
+        <RaceCanvas
+          raceEngine={raceEngine}
+          data-testid="race-canvas"
+        />
       </div>
 
       {/* Race Info Footer */}

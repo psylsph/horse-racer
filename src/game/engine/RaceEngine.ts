@@ -131,8 +131,8 @@ export class RaceEngine {
       const velocity = this.calculateVelocity(horse, horsePos, conditions);
 
       // Update position (velocity is in pixels per frame, convert to percentage)
-      // Increased scale factor for faster races
-      const distancePerFrame = velocity * 0.003;
+      // Scale factor controls race speed - lower means slower race
+      const distancePerFrame = velocity * 0.0003;
       horsePos.position += distancePerFrame;
       horsePos.velocity = velocity;
 
@@ -192,12 +192,14 @@ export class RaceEngine {
     velocity *= fadeFactor;
 
     // Acceleration phase (first 10% of race)
+    // Start with minimum 10% of velocity and ramp up to 100%
     if (horsePos.position < 0.1) {
-      const accelProgress = horsePos.position / 0.1;
+      const accelProgress = 0.1 + (horsePos.position / 0.1) * 0.9;
       velocity *= accelProgress;
     }
 
-    return Math.max(0, velocity);
+    const finalVelocity = Math.max(0, velocity);
+    return finalVelocity;
   }
 
   /**
