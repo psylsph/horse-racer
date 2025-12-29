@@ -10,12 +10,12 @@ export function RaceCanvas({ raceEngine }: RaceCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const appRef = useRef<Application | null>(null);
   const horseSpritesRef = useRef<Map<string, Graphics>>(new Map());
-  const renderCountRef = useRef(0);
   const raceEngineRef = useRef<RaceEngine | null>(null);
   const unsubscribeRef = useRef<(() => void) | null>(null);
   const isAppInitializedRef = useRef(false);
   const isStrictModeUnmountRef = useRef(false);
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
+  const [isAppInitialized, setIsAppInitialized] = useState(false);
 
   // Update the raceEngine ref whenever the prop changes
   useEffect(() => {
@@ -88,6 +88,7 @@ export function RaceCanvas({ raceEngine }: RaceCanvasProps) {
         createTrackBackground(app, app.stage);
 
         isAppInitializedRef.current = true;
+        setIsAppInitialized(true);
       } catch (error) {
         console.error('[RaceCanvas] Failed to initialize PixiJS app:', error);
         // Try to clean up on error
@@ -120,6 +121,7 @@ export function RaceCanvas({ raceEngine }: RaceCanvasProps) {
           appRef.current = null;
         }
         isAppInitializedRef.current = false;
+        setIsAppInitialized(false);
       });
       
       // Reset strict mode flag after a short delay to allow remount
@@ -132,9 +134,9 @@ export function RaceCanvas({ raceEngine }: RaceCanvasProps) {
   // Separate effect to handle raceEngine changes without cleanup
   useEffect(() => {
     const app = appRef.current;
-    console.log('[RaceCanvas] raceEngine effect - app:', !!app, 'raceEngine:', !!raceEngineRef.current, 'initialized:', isAppInitializedRef.current);
+    console.log('[RaceCanvas] raceEngine effect - app:', !!app, 'raceEngine:', !!raceEngineRef.current, 'initialized:', isAppInitialized);
     
-    if (!app || !raceEngineRef.current || !isAppInitializedRef.current) {
+    if (!app || !raceEngineRef.current || !isAppInitialized) {
       console.log('[RaceCanvas] Cannot setup - missing dependencies');
       return;
     }
@@ -142,20 +144,20 @@ export function RaceCanvas({ raceEngine }: RaceCanvasProps) {
     const engine = raceEngineRef.current;
     console.log('[RaceCanvas] Setting up horse sprites');
 
-    // Create horse sprites if not already created
-    if (horseSpritesRef.current.size === 0) {
-      console.log('[RaceCanvas] Creating horse sprites...');
-      const sprites = createHorseSprites(app, engine);
-      horseSpritesRef.current = sprites;
-      console.log('[RaceCanvas] Created', sprites.size, 'horse sprites');
-    } else {
-      console.log('[RaceCanvas] Horse sprites already exist:', horseSpritesRef.current.size);
-    }
-
     // Subscribe to engine updates
     const unsubscribe = engine.addFrameListener((frame) => {
       const trackPadding = 100;
       const trackWidth = app.screen.width - trackPadding * 2;
+      
+      // Create horse sprites on first frame update if not already created
+      if (horseSpritesRef.current.size === 0 && frame.positions.length > 0) {
+        console.log('[RaceCanvas] Creating horse sprites on first frame...');
+        const sprites = createHorseSprites(app, engine);
+        horseSpritesRef.current = sprites;
+        console.log('[RaceCanvas] Created', sprites.size, 'horse sprites');
+      }
+      
+      // Update sprite positions
       frame.positions.forEach((pos) => {
         const horseSprite = horseSpritesRef.current.get(pos.horseId);
         if (horseSprite) {
@@ -170,8 +172,9 @@ export function RaceCanvas({ raceEngine }: RaceCanvasProps) {
     return () => {
       unsubscribe();
       unsubscribeRef.current = null;
+      horseSpritesRef.current.clear(); // Clear sprites on unmount
     };
-  }, [raceEngine]); // This effect runs when raceEngine changes
+  }, [raceEngine, isAppInitialized]); // This effect runs when raceEngine or app initialization changes
 
   return (
     <canvas
