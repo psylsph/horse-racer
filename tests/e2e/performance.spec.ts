@@ -2,10 +2,10 @@ import { test, expect } from '@playwright/test';
 import { clearLocalStorage, waitForAppLoad } from '../helpers/test-utils';
 
 test.describe('Performance Tests', () => {
-  test('should load initial page within time limit', async ({ page }) => {
+  test('should load initial page within time limit', async ({ page, context }) => {
     const startTime = Date.now();
     
-    await clearLocalStorage(page);
+    await context.clearCookies();
     await page.goto('/');
     await waitForAppLoad(page);
     
@@ -17,8 +17,8 @@ test.describe('Performance Tests', () => {
     console.log(`Initial page load time: ${loadTime}ms`);
   });
 
-  test('should navigate to form within time limit', async ({ page }) => {
-    await clearLocalStorage(page);
+  test('should navigate to form within time limit', async ({ page, context }) => {
+    await context.clearCookies();
     await page.goto('/');
     await waitForAppLoad(page);
     
@@ -35,8 +35,8 @@ test.describe('Performance Tests', () => {
     console.log(`Form navigation time: ${navTime}ms`);
   });
 
-  test('should navigate to race within time limit', async ({ page }) => {
-    await clearLocalStorage(page);
+  test('should navigate to race within time limit', async ({ page, context }) => {
+    await context.clearCookies();
     await page.goto('/');
     await waitForAppLoad(page);
     
@@ -57,8 +57,8 @@ test.describe('Performance Tests', () => {
     console.log(`Race navigation time: ${navTime}ms`);
   });
 
-  test('should complete race animation smoothly', async ({ page }) => {
-    await clearLocalStorage(page);
+  test('should complete race animation smoothly', async ({ page, context }) => {
+    await context.clearCookies();
     await page.goto('/');
     await waitForAppLoad(page);
     
@@ -80,8 +80,8 @@ test.describe('Performance Tests', () => {
     console.log(`Race completion time: ${raceTime}ms`);
   });
 
-  test('should handle rapid navigation without performance degradation', async ({ page }) => {
-    await clearLocalStorage(page);
+  test('should handle rapid navigation without performance degradation', async ({ page, context }) => {
+    await context.clearCookies();
     await page.goto('/');
     await waitForAppLoad(page);
     
@@ -110,8 +110,8 @@ test.describe('Performance Tests', () => {
     console.log(`Average navigation time: ${avgTime}ms`);
   });
 
-  test('should maintain performance with large DOM', async ({ page }) => {
-    await clearLocalStorage(page);
+  test('should maintain performance with large DOM', async ({ page, context }) => {
+    await context.clearCookies();
     await page.goto('/');
     await waitForAppLoad(page);
     
@@ -135,8 +135,8 @@ test.describe('Performance Tests', () => {
     console.log(`Scroll through all cards time: ${scrollTime}ms`);
   });
 
-  test('should not have memory leaks during race', async ({ page }) => {
-    await clearLocalStorage(page);
+  test('should not have memory leaks during race', async ({ page, context }) => {
+    await context.clearCookies();
     await page.goto('/');
     await waitForAppLoad(page);
     
@@ -170,7 +170,7 @@ test.describe('Performance Tests', () => {
     }
   });
 
-  test('should handle slow network gracefully', async ({ page }) => {
+  test('should handle slow network gracefully', async ({ page, context }) => {
     // Simulate slow network by adding delay
     await page.route('**/*', async route => {
       // Add 100ms delay
@@ -180,7 +180,7 @@ test.describe('Performance Tests', () => {
     
     const startTime = Date.now();
     
-    await clearLocalStorage(page);
+    await context.clearCookies();
     await page.goto('/');
     await waitForAppLoad(page);
     
@@ -192,8 +192,8 @@ test.describe('Performance Tests', () => {
     console.log(`Slow network load time: ${loadTime}ms`);
   });
 
-  test('should have smooth animations', async ({ page }) => {
-    await clearLocalStorage(page);
+  test('should have smooth animations', async ({ page, context }) => {
+    await context.clearCookies();
     await page.goto('/');
     await waitForAppLoad(page);
     
@@ -223,8 +223,8 @@ test.describe('Performance Tests', () => {
     console.log(`Average frame time: ${avgFrameTime.toFixed(2)}ms`);
   });
 
-  test('should render quickly on reload', async ({ page }) => {
-    await clearLocalStorage(page);
+  test('should render quickly on reload', async ({ page, context }) => {
+    await context.clearCookies();
     await page.goto('/');
     await waitForAppLoad(page);
     
@@ -252,8 +252,8 @@ test.describe('Performance Tests', () => {
     console.log(`Average reload time: ${avgReloadTime.toFixed(2)}ms`);
   });
 
-  test('should have minimal layout shifts', async ({ page }) => {
-    await clearLocalStorage(page);
+  test('should have minimal layout shifts', async ({ page, context }) => {
+    await context.clearCookies();
     
     // Track layout shifts
     const clsScore = await page.evaluate(() => {

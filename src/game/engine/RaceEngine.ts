@@ -92,7 +92,7 @@ export class RaceEngine {
   }
 
   /**
-   * Calculate the next frame of the race
+   * Calculate next frame of race
    */
   private calculateNextFrame(): RaceFrame {
     const currentTime = Date.now() - this.startTime;
@@ -113,7 +113,8 @@ export class RaceEngine {
       const velocity = this.calculateVelocity(horse, horsePos, conditions);
       
       // Update position (velocity is in pixels per frame, convert to percentage)
-      const distancePerFrame = velocity * 0.001; // Scale factor
+      // Increased scale factor for faster races
+      const distancePerFrame = velocity * 0.003; 
       horsePos.position += distancePerFrame;
       horsePos.velocity = velocity;
 
@@ -127,7 +128,7 @@ export class RaceEngine {
       }
     });
 
-    // Find the leader
+    // Find leader
     const leader = positions.reduce((leader, pos) => 
       pos.position > leader.position ? pos : leader
     );

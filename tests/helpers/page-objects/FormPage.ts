@@ -102,7 +102,7 @@ export class FormPage {
    * Click start race button
    */
   async clickStartRace() {
-    await this.page.click(SELECTORS.startRaceButton);
+    await this.page.click(SELECTORS.formStartRaceButton);
   }
 
   /**
@@ -116,7 +116,7 @@ export class FormPage {
    * Assert start race button is visible
    */
   async assertStartRaceButtonVisible() {
-    await expect(this.page.locator(SELECTORS.startRaceButton)).toBeVisible();
+    await expect(this.page.locator(SELECTORS.formStartRaceButton)).toBeVisible();
   }
 
   /**

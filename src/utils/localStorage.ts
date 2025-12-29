@@ -65,20 +65,20 @@ export const walletStorage = {
   updateBalance(amount: number): Wallet {
     const wallet = this.get();
     wallet.balance += amount;
-    
+
     if (amount > 0) {
       wallet.totalWinnings += amount;
     } else {
       wallet.totalLosses += Math.abs(amount);
     }
-    
+
     this.set(wallet);
     return wallet;
   },
 
   updateStreak(won: boolean): Wallet {
     const wallet = this.get();
-    
+
     if (won) {
       wallet.currentStreak += 1;
       if (wallet.currentStreak > wallet.bestStreak) {
@@ -87,7 +87,7 @@ export const walletStorage = {
     } else {
       wallet.currentStreak = 0;
     }
-    
+
     this.set(wallet);
     return wallet;
   },
@@ -117,13 +117,13 @@ export const progressStorage = {
   addExperience(amount: number): UserProgress {
     const progress = this.get();
     progress.experience += amount;
-    
+
     // Level up every 1000 experience
     const newLevel = Math.floor(progress.experience / 1000) + 1;
     if (newLevel > progress.level) {
       progress.level = newLevel;
     }
-    
+
     this.set(progress);
     return progress;
   },
@@ -132,11 +132,11 @@ export const progressStorage = {
     const progress = this.get();
     progress.statistics.totalBets += 1;
     progress.statistics.profit += profit;
-    
+
     // Update win rate
     const wins = progress.statistics.winRate * (progress.statistics.totalBets - 1) + (win ? 1 : 0);
     progress.statistics.winRate = wins / progress.statistics.totalBets;
-    
+
     this.set(progress);
     return progress;
   },
@@ -189,6 +189,10 @@ export const horsesStorage = {
       horses[index] = { ...horses[index], ...updates };
       this.set(horses);
     }
+  },
+
+  clear(): void {
+    storage.remove(STORAGE_KEYS.HORSES);
   },
 };
 

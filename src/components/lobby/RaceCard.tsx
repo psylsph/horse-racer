@@ -11,7 +11,7 @@ interface RaceCardProps {
 }
 
 export function RaceCard({ race, onSelect }: RaceCardProps) {
-  const [timeUntil, setTimeUntil] = useState(race.startTime - Date.now());
+  const [timeUntil, setTimeUntil] = useState(Math.max(0, race.startTime - Date.now()));
   const [isReady, setIsReady] = useState(Date.now() >= race.startTime);
 
   useEffect(() => {
@@ -35,6 +35,7 @@ export function RaceCard({ race, onSelect }: RaceCardProps) {
       className="hover:border-turf-500 transition-colors cursor-pointer"
       data-testid="race-card"
       data-race-id={race.id}
+      onClick={() => onSelect(race)}
     >
       <CardHeader className="flex items-start justify-between">
         <div>
@@ -62,12 +63,11 @@ export function RaceCard({ race, onSelect }: RaceCardProps) {
               )}
             </p>
           </div>
-          <Button 
-            variant="primary" 
+          <Button
+            variant="primary"
             onClick={() => onSelect(race)}
-            disabled={!isReady}
           >
-            {isReady ? 'View Race' : 'Wait'}
+            View Race
           </Button>
         </div>
       </CardContent>

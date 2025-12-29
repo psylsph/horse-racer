@@ -2,8 +2,10 @@ import { test, expect } from '@playwright/test';
 import { clearLocalStorage, waitForAppLoad } from '../helpers/test-utils';
 
 test.describe('Accessibility Tests', () => {
-  test.beforeEach(async ({ page }) => {
-    await clearLocalStorage(page);
+  test.beforeEach(async ({ page, context }) => {
+    // Clear storage at context level before navigation
+    await context.clearCookies();
+    
     await page.goto('/');
     await waitForAppLoad(page);
   });

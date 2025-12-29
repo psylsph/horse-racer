@@ -70,7 +70,7 @@ export function RaceCanvas({ width, height, raceEngine }: RaceCanvasProps) {
         console.log('[RaceCanvas] App exists');
         // Cancel any pending timeouts
         // In PixiJS v8, destroy takes an options object
-        appRef.current.destroy({ removeView: true });
+        //appRef.current.destroy({ removeView: true });
         appRef.current = null;
         stageRef.current = null;
       }

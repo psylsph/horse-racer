@@ -9,17 +9,14 @@ export function Lobby() {
   const { setCurrentScreen, setCurrentRace } = useGameStore();
   const { getRaceHorses } = useHorseStore();
   const [races, setRaces] = useState<Race[]>([]);
-  const [selectedRace, setSelectedRace] = useState<Race | null>(null);
 
   useEffect(() => {
-    // Generate initial races
     const horses = getRaceHorses(20);
     const upcomingRaces = generateUpcomingRaces(horses, 5);
     setRaces(upcomingRaces);
   }, [getRaceHorses]);
 
   const handleSelectRace = (race: Race) => {
-    setSelectedRace(race);
     setCurrentRace(race);
     setCurrentScreen('form');
   };

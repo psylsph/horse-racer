@@ -41,21 +41,21 @@ export class RacePage {
    * Click start race button
    */
   async clickStartRace() {
-    await this.page.click(SELECTORS.startButton);
+    await this.page.click(SELECTORS.raceStartRaceButton);
   }
 
   /**
    * Assert start race button is visible
    */
   async assertStartRaceButtonVisible() {
-    await expect(this.page.locator(SELECTORS.startButton)).toBeVisible();
+    await expect(this.page.locator(SELECTORS.raceStartRaceButton)).toBeVisible();
   }
 
   /**
    * Assert start race button is hidden
    */
   async assertStartRaceButtonHidden() {
-    await expect(this.page.locator(SELECTORS.startButton)).not.toBeVisible();
+    await expect(this.page.locator(SELECTORS.raceStartRaceButton)).not.toBeVisible();
   }
 
   /**

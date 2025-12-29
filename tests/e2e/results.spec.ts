@@ -2,8 +2,10 @@ import { test, expect } from '@playwright/test';
 import { clearLocalStorage, waitForAppLoad, selectRace } from '../helpers/test-utils';
 
 test.describe('Results Screen', () => {
-  test.beforeEach(async ({ page }) => {
-    await clearLocalStorage(page);
+  test.beforeEach(async ({ page, context }) => {
+    // Clear storage at context level before navigation
+    await context.clearCookies();
+    
     await page.goto('/');
     await waitForAppLoad(page);
     

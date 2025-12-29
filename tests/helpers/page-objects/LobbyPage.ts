@@ -44,7 +44,9 @@ export class LobbyPage {
       throw new Error(`Race index ${index} out of bounds. Only ${count} races available.`);
     }
     
-    await raceCards.nth(index).click();
+    const raceCard = raceCards.nth(index);
+    await raceCard.waitFor({ state: 'attached', timeout: 5000 });
+    await raceCard.click();
   }
 
   /**

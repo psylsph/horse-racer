@@ -30,8 +30,8 @@ function App() {
         <div className="container mx-auto px-4 py-8">
           {currentScreen === 'lobby' && <Lobby />}
           
-          {currentScreen === 'form' && (
-            <Form race={currentRace!} />
+          {currentScreen === 'form' && currentRace && (
+            <Form race={currentRace} />
           )}
           
           {currentScreen === 'race' && currentRace && (

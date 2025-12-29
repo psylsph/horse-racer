@@ -81,22 +81,22 @@ export function RaceView({ race }: RaceViewProps) {
           </div>
           <div className="flex items-center gap-4">
             {!isRunning && !isFinished && (
-              <Button variant="primary" onClick={handleStartRace}>
+              <Button variant="primary" onClick={handleStartRace} data-testid="race-start-race-button">
                 Start Race
               </Button>
             )}
             {isRunning && (
-              <div className="flex items-center gap-2 text-turf-400">
+              <div className="flex items-center gap-2 text-turf-400" data-testid="racing-indicator">
                 <div className="animate-spin h-5 w-5 border-2 border-turf-400 border-t-transparent rounded-full" />
                 <span>Racing...</span>
               </div>
             )}
             {isFinished && (
               <Badge variant="success" data-testid="finished-badge">Finished!</Badge>
-              )}
-              <Button variant="secondary" onClick={handleBack} data-testid="back-button">
-                ← Back
-              </Button>
+            )}
+            <Button variant="secondary" onClick={handleBack} data-testid="back-button">
+              ← Back
+            </Button>
           </div>
         </div>
       </div>

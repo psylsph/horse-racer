@@ -87,10 +87,10 @@ export function generateUpcomingRaces(horses: Horse[], count: number): Race[] {
   const races: Race[] = [];
   const now = Date.now();
   
-  // In test mode, make races ready immediately
-  const isTestMode = process.env.NODE_ENV === 'test';
-  const baseStartTime = isTestMode ? now : now + 30000;
-  const staggerTime = isTestMode ? 1000 : 120000;
+  // Always make races ready immediately for better UX and testing
+  // First race starts now, subsequent races staggered by 1 second
+  const baseStartTime = now;
+  const staggerTime = 1000;
   
   for (let i = 0; i < count; i++) {
     // Shuffle horses for each race

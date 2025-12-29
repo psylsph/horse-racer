@@ -1,15 +1,21 @@
 import { test, expect } from '@playwright/test';
-import { clearLocalStorage, waitForAppLoad } from '../helpers/test-utils';
+import { clearLocalStorage, waitForAppLoad, SELECTORS } from '../helpers/test-utils';
 import { LobbyPage } from '../helpers/page-objects/LobbyPage';
 
 test.describe('Lobby Screen', () => {
   let lobbyPage: LobbyPage;
 
-  test.beforeEach(async ({ page }) => {
-    // Clear localStorage before each test
+  test.beforeEach(async ({ page, context }) => {
+    // Clear storage at context level before navigation
+    await context.clearCookies();
     await clearLocalStorage(page);
+    
+    // Navigate to page
     await page.goto('/');
     await waitForAppLoad(page);
+    
+    // Ensure we're on the lobby
+    await expect(page.locator(SELECTORS.lobbyTitle)).toBeVisible();
     
     lobbyPage = new LobbyPage(page);
   });
@@ -47,11 +53,14 @@ test.describe('Lobby Screen', () => {
   test('should navigate to form when clicking race card', async ({ page }) => {
     await lobbyPage.selectRace(0);
     
+    // Wait for navigation to form screen
+    await page.waitForSelector(SELECTORS.formTitle, { timeout: 5000 });
+    
     // Should navigate to form screen
-    await expect(page.locator('h2:has-text("Race #")')).toBeVisible();
+    await expect(page.locator(SELECTORS.formTitle)).toBeVisible();
     
     // Should not be on lobby anymore
-    await expect(page.locator('[data-testid="lobby-title"]')).not.toBeVisible();
+    await expect(page.locator(SELECTORS.lobbyTitle)).not.toBeVisible();
   });
 
   test('should display header with app title', async ({ page }) => {
@@ -74,15 +83,18 @@ test.describe('Lobby Screen', () => {
     
     // Select first race
     await lobbyPage.selectRace(0);
-    await expect(page.locator('h2:has-text("Race #")')).toBeVisible();
+    await page.waitForSelector(SELECTORS.formTitle, { timeout: 5000 });
+    await expect(page.locator(SELECTORS.formTitle)).toBeVisible();
     
     // Go back to lobby
-    await page.click('[data-testid="back-button"]');
-    await expect(page.locator('[data-testid="lobby-title"]')).toBeVisible();
+    await page.click(SELECTORS.backButton);
+    await page.waitForSelector(SELECTORS.lobbyTitle, { timeout: 5000 });
+    await expect(page.locator(SELECTORS.lobbyTitle)).toBeVisible();
     
     // Select second race
     await lobbyPage.selectRace(1);
-    await expect(page.locator('h2:has-text("Race #")')).toBeVisible();
+    await page.waitForSelector(SELECTORS.formTitle, { timeout: 5000 });
+    await expect(page.locator(SELECTORS.formTitle)).toBeVisible();
   });
 
   test('should have responsive layout', async ({ page }) => {

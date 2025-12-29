@@ -10,33 +10,34 @@ export const SELECTORS = {
   header: '[data-testid="app-header"]',
   main: '[data-testid="app-main"]',
   footer: '[data-testid="app-footer"]',
-  
+
   // Lobby selectors
   lobbyContainer: '[data-testid="lobby-container"]',
   lobbyTitle: '[data-testid="lobby-title"]',
   raceCard: '[data-testid="race-card"]',
   liveIndicator: '.animate-pulse-slow',
-  
+
   // Form selectors
   formTitle: 'h2:has-text("Race #")',
   horseCard: '[data-testid="horse-card"]',
   horseName: '[data-testid="horse-name"]',
   horseStats: '[data-testid="horse-stats"]',
   oddsBadge: '[data-testid="odds-badge"]',
-  startRaceButton: '[data-testid="start-race-button"]',
+  formStartRaceButton: '[data-testid="form-start-race-button"]',
   backButton: '[data-testid="back-button"]',
-  
+
   // Race selectors
   raceTitle: 'h2:has-text("Race #")',
-  startButton: 'button:has-text("Start Race")',
-  racingIndicator: 'text=Racing...',
+  raceStartRaceButton: '[data-testid="race-start-race-button"]',
+  startButton: '[data-testid="race-start-race-button"]', // Alias for raceStartRaceButton
+  racingIndicator: '[data-testid="racing-indicator"]',
   finishedBadge: '[data-testid="finished-badge"]',
   progressBar: '[data-testid="progress-bar"]',
   raceCanvas: '[data-testid="race-canvas"]',
-  
+
   // Results selectors
   resultsTitle: '[data-testid="results-title"]',
-  
+
   // General UI
   button: 'button',
   card: '[data-testid="card"]',
@@ -46,10 +47,16 @@ export const SELECTORS = {
 
 /**
  * Clear all localStorage data
+ * Must be called after page.goto() when a page context exists
  */
 export async function clearLocalStorage(page: Page) {
   await page.evaluate(() => {
-    localStorage.clear();
+    try {
+      localStorage.clear();
+    } catch (e) {
+      // localStorage may not be available in all contexts
+      console.warn('Could not clear localStorage:', e);
+    }
   });
 }
 
@@ -87,14 +94,15 @@ export async function navigateToLobby(page: Page) {
 export async function selectRace(page: Page, index: number = 0) {
   const raceCards = page.locator(SELECTORS.raceCard);
   await raceCards.nth(index).click();
+  await page.waitForSelector(SELECTORS.formTitle, { timeout: 5000 });
   await expect(page.locator(SELECTORS.formTitle)).toBeVisible();
 }
 
 /**
- * Start the race
+ * Start the race from race screen
  */
 export async function startRace(page: Page) {
-  await page.click(SELECTORS.startRaceButton);
+  await page.click(SELECTORS.raceStartRaceButton);
   await expect(page.locator(SELECTORS.racingIndicator)).toBeVisible({ timeout: 5000 });
 }
 

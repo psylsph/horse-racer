@@ -2,8 +2,8 @@ import { test, expect } from '@playwright/test';
 import { clearLocalStorage, waitForAppLoad, seedTestData } from '../helpers/test-utils';
 
 test.describe('Edge Cases and Error Scenarios', () => {
-  test('should handle no races available', async ({ page }) => {
-    await clearLocalStorage(page);
+  test('should handle no races available', async ({ page, context }) => {
+    await context.clearCookies();
     
     // Seed empty race data
     await seedTestData(page, {
@@ -17,8 +17,8 @@ test.describe('Edge Cases and Error Scenarios', () => {
     await expect(page.locator('#root')).toBeVisible();
   });
 
-  test('should handle corrupted localStorage data', async ({ page }) => {
-    await clearLocalStorage(page);
+  test('should handle corrupted localStorage data', async ({ page, context }) => {
+    await context.clearCookies();
     
     // Seed invalid JSON data
     await page.evaluate(() => {
@@ -33,8 +33,8 @@ test.describe('Edge Cases and Error Scenarios', () => {
     await expect(page.locator('[data-testid="lobby-title"]')).toBeVisible();
   });
 
-  test('should handle missing localStorage data', async ({ page }) => {
-    await clearLocalStorage(page);
+  test('should handle missing localStorage data', async ({ page, context }) => {
+    await context.clearCookies();
     
     // Don't seed any data
     await page.goto('/');
@@ -45,8 +45,8 @@ test.describe('Edge Cases and Error Scenarios', () => {
     await expect(page.locator('[data-testid="race-card"]')).toHaveCount(5);
   });
 
-  test('should handle race with all horses having same stats', async ({ page }) => {
-    await clearLocalStorage(page);
+  test('should handle race with all horses having same stats', async ({ page, context }) => {
+    await context.clearCookies();
     
     // Create horses with identical stats
     const identicalHorses = {
@@ -79,8 +79,8 @@ test.describe('Edge Cases and Error Scenarios', () => {
     await expect(page.locator('[data-testid="horse-card"]')).toHaveCount(20);
   });
 
-  test('should handle extreme stat values (0)', async ({ page }) => {
-    await clearLocalStorage(page);
+  test('should handle extreme stat values (0)', async ({ page, context }) => {
+    await context.clearCookies();
     
     // Create horses with minimum stats
     const minHorses = {
@@ -113,8 +113,8 @@ test.describe('Edge Cases and Error Scenarios', () => {
     await expect(page.locator('[data-testid="horse-card"]')).toHaveCount(20);
   });
 
-  test('should handle extreme stat values (100)', async ({ page }) => {
-    await clearLocalStorage(page);
+  test('should handle extreme stat values (100)', async ({ page, context }) => {
+    await context.clearCookies();
     
     // Create horses with maximum stats
     const maxHorses = {
@@ -147,8 +147,8 @@ test.describe('Edge Cases and Error Scenarios', () => {
     await expect(page.locator('[data-testid="horse-card"]')).toHaveCount(20);
   });
 
-  test('should handle very long horse names', async ({ page }) => {
-    await clearLocalStorage(page);
+  test('should handle very long horse names', async ({ page, context }) => {
+    await context.clearCookies();
     
     // Create horse with very long name
     const longName = 'A'.repeat(200);
@@ -182,8 +182,8 @@ test.describe('Edge Cases and Error Scenarios', () => {
     await expect(page.locator('[data-testid="horse-card"]')).toHaveCount(20);
   });
 
-  test('should handle rapid screen switching', async ({ page }) => {
-    await clearLocalStorage(page);
+  test('should handle rapid screen switching', async ({ page, context }) => {
+    await context.clearCookies();
     await page.goto('/');
     await waitForAppLoad(page);
     
@@ -198,8 +198,8 @@ test.describe('Edge Cases and Error Scenarios', () => {
     await expect(page.locator('[data-testid="lobby-title"]')).toBeVisible();
   });
 
-  test('should handle race interruption', async ({ page }) => {
-    await clearLocalStorage(page);
+  test('should handle race interruption', async ({ page, context }) => {
+    await context.clearCookies();
     await page.goto('/');
     await waitForAppLoad(page);
     
@@ -218,8 +218,8 @@ test.describe('Edge Cases and Error Scenarios', () => {
     await expect(page.locator('[data-testid="start-race-button"]')).toBeVisible();
   });
 
-  test('should handle browser refresh during race', async ({ page }) => {
-    await clearLocalStorage(page);
+  test('should handle browser refresh during race', async ({ page, context }) => {
+    await context.clearCookies();
     await page.goto('/');
     await waitForAppLoad(page);
     
@@ -239,8 +239,8 @@ test.describe('Edge Cases and Error Scenarios', () => {
     await expect(page.locator('h2:has-text("Race #")')).toBeVisible();
   });
 
-  test('should handle invalid URL routes', async ({ page }) => {
-    await clearLocalStorage(page);
+  test('should handle invalid URL routes', async ({ page, context }) => {
+    await context.clearCookies();
     
     // Try various invalid routes
     const invalidRoutes = [
@@ -259,8 +259,8 @@ test.describe('Edge Cases and Error Scenarios', () => {
     }
   });
 
-  test('should handle very large localStorage', async ({ page }) => {
-    await clearLocalStorage(page);
+  test('should handle very large localStorage', async ({ page, context }) => {
+    await context.clearCookies();
     
     // Create large amount of data
     const largeHorses = {
@@ -299,8 +299,8 @@ test.describe('Edge Cases and Error Scenarios', () => {
     await expect(page.locator('[data-testid="lobby-title"]')).toBeVisible();
   });
 
-  test('should handle network timeout gracefully', async ({ page }) => {
-    await clearLocalStorage(page);
+  test('should handle network timeout gracefully', async ({ page, context }) => {
+    await context.clearCookies();
     
     // Block some requests to simulate network issues
     await page.route('**/*', async route => {
@@ -318,8 +318,8 @@ test.describe('Edge Cases and Error Scenarios', () => {
     await expect(page.locator('#root')).toBeVisible();
   });
 
-  test('should handle race with single horse', async ({ page }) => {
-    await clearLocalStorage(page);
+  test('should handle race with single horse', async ({ page, context }) => {
+    await context.clearCookies();
     
     // Create race with only one horse
     const singleHorse = {
@@ -352,8 +352,8 @@ test.describe('Edge Cases and Error Scenarios', () => {
     await expect(page.locator('[data-testid="horse-card"]')).toHaveCount(1);
   });
 
-  test('should handle concurrent race attempts', async ({ page }) => {
-    await clearLocalStorage(page);
+  test('should handle concurrent race attempts', async ({ page, context }) => {
+    await context.clearCookies();
     await page.goto('/');
     await waitForAppLoad(page);
     

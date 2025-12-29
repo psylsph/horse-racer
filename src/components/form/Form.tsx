@@ -115,7 +115,7 @@ export function Form({ race }: FormProps) {
 
       <div className="fixed bottom-16 left-0 right-0 bg-slate-900/95 backdrop-blur-sm border-t border-slate-800 p-4">
         <div className="container mx-auto flex justify-center">
-          <Button variant="primary" size="lg" onClick={handleStartRace} data-testid="start-race-button">
+          <Button variant="primary" size="lg" onClick={handleStartRace} data-testid="form-start-race-button">
             Start Race 🏁
           </Button>
         </div>

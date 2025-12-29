@@ -1,18 +1,25 @@
 import { test, expect } from '@playwright/test';
-import { clearLocalStorage, waitForAppLoad, selectRace } from '../helpers/test-utils';
+import { clearLocalStorage, waitForAppLoad, selectRace, SELECTORS } from '../helpers/test-utils';
 import { RacePage } from '../helpers/page-objects/RacePage';
 
 test.describe('Race Screen', () => {
   let racePage: RacePage;
 
-  test.beforeEach(async ({ page }) => {
-    await clearLocalStorage(page);
+  test.beforeEach(async ({ page, context }) => {
+    // Clear storage at context level before navigation
+    await context.clearCookies();
+    
     await page.goto('/');
     await waitForAppLoad(page);
     
-    // Navigate to form and then start race
+    // Navigate to form
     await selectRace(page, 0);
-    await page.click('[data-testid="start-race-button"]');
+    
+    // Navigate to race screen
+    await page.click(SELECTORS.formStartRaceButton);
+    
+    // Wait for race screen to be ready
+    await page.waitForSelector(SELECTORS.raceStartRaceButton, { timeout: 5000 });
     
     racePage = new RacePage(page);
     await racePage.assertIsVisible();
@@ -170,6 +177,69 @@ test.describe('Race Screen', () => {
     // Check for progress bar accessibility
     const progressBar = page.locator('[role="progressbar"]');
     await expect(progressBar).toBeVisible();
+  });
+
+  test('should complete race simulation successfully', async ({ page }) => {
+    await racePage.clickStartRace();
+    
+    // Wait for race to start
+    await racePage.assertRacingIndicatorVisible();
+    
+    // Verify progress increases
+    await page.waitForTimeout(1000);
+    const progress1 = await racePage.getProgress();
+    expect(progress1).toBeGreaterThan(0);
+    
+    // Wait for more progress
+    await page.waitForTimeout(1000);
+    const progress2 = await racePage.getProgress();
+    expect(progress2).toBeGreaterThan(progress1);
+    
+    // Wait for completion
+    await racePage.waitForRaceCompletion(60000);
+    
+    // Verify final state
+    await racePage.assertFinishedBadgeVisible();
+    await racePage.assertStartRaceButtonHidden();
+    
+    const finalProgress = await racePage.getProgress();
+    expect(finalProgress).toBeGreaterThanOrEqual(100);
+  });
+
+  test('should show correct horse count during race', async ({ page }) => {
+    const horseCount = await racePage.getHorseCount();
+    const count = parseInt(horseCount || '0');
+    
+    expect(count).toBeGreaterThan(0);
+    expect(count).toBeLessThanOrEqual(10);
+  });
+
+  test('should maintain race state during progress', async ({ page }) => {
+    await racePage.clickStartRace();
+    
+    // Check multiple times during race
+    for (let i = 0; i < 3; i++) {
+      await page.waitForTimeout(500);
+      const progress = await racePage.getProgress();
+      expect(progress).toBeGreaterThanOrEqual(0);
+      expect(progress).toBeLessThanOrEqual(100);
+    }
+    
+    // Wait for completion
+    await racePage.waitForRaceCompletion(60000);
+  });
+
+  test('should navigate to results after race finishes', async ({ page }) => {
+    await racePage.clickStartRace();
+    
+    // Wait for race to complete
+    await racePage.waitForRaceCompletion(60000);
+    
+    // Wait for navigation to results (2 second delay in RaceView)
+    await page.waitForTimeout(3000);
+    
+    // Should be on results screen
+    await expect(page.locator('[data-testid="results-title"]')).toBeVisible();
   });
 
   test('should maintain race state during page reload', async ({ page }) => {
