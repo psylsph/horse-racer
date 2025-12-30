@@ -131,20 +131,28 @@ export const useBettingStore = create<BettingState>((set, get) => ({
       }
 
       return {
-        ...bet,
-        status: (won ? 'won' : 'lost') as 'won' | 'lost',
+        id: bet.id,
+        raceId: bet.raceId,
+        type: bet.type,
+        horseIds: bet.horseIds,
+        amount: bet.amount,
+        potentialPayout: bet.potentialPayout,
         winnings: won ? winnings : 0,
+        status: (won ? 'won' : 'lost') as 'won' | 'lost',
+        placedAt: bet.placedAt,
       };
     });
 
     set({ currentBets: updatedBets });
 
-    updatedBets.forEach((bet) => {
-      betsStorage.update(bet.id, { 
-        status: bet.status as 'won' | 'lost' | 'pending',
-        winnings: bet.winnings || 0,
-      });
-    });
+    const totalStake = updatedBets.reduce((sum, bet) => sum + bet.amount, 0);
+
+    return { totalWinnings, totalStake, wonBets, lostBets };
+  },
+
+  getBetResult: (betId: string) => {
+    const bet = get().currentBets.find(b => b.id === betId);
+    return bet?.status || 'pending';
   },
 
   getBetResult: (betId: string) => {

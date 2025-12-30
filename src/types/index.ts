@@ -67,6 +67,7 @@ export interface Bet {
   horseIds: string[];
   amount: number;
   potentialPayout: number;
+  winnings: number;
   status: 'pending' | 'won' | 'lost';
   placedAt: number;
 }
