@@ -30,7 +30,7 @@ export function Form({ race }: FormProps) {
     <div className="space-y-6 pb-24">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="font-display text-3xl font-bold text-white">
+          <h2 className="font-display text-2xl md:text-3xl font-bold text-white">
             Race #{race.id.slice(-4)}
           </h2>
           <p className="text-slate-400 mt-1">
@@ -47,7 +47,7 @@ export function Form({ race }: FormProps) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
         {race.horses.map((horse) => {
           const odds = calculateOdds(horse, race);
           const isSelected = selectedHorse?.id === horse.id;
@@ -72,7 +72,7 @@ export function Form({ race }: FormProps) {
                       style={{ backgroundColor: horse.color }}
                     />
                     <div>
-                      <CardTitle className="text-lg" data-testid="horse-name">{horse.name}</CardTitle>
+                      <CardTitle className="text-base md:text-lg" data-testid="horse-name">{horse.name}</CardTitle>
                       <p className="text-xs text-slate-400">
                         {horse.totalRaces} races • {Math.round(horse.winRate * 100)}% win rate
                       </p>
@@ -89,43 +89,58 @@ export function Form({ race }: FormProps) {
 
               <CardContent data-testid="horse-stats">
                 <div className="space-y-3">
-                  <div>
-                    <div className="flex justify-between text-xs text-slate-400 mb-1">
-                      <span>Speed</span>
-                      <span>{horse.topSpeed}</span>
-                    </div>
-                    <Progress value={horse.topSpeed} max={100} variant="turf" size="sm" />
-                  </div>
+                  {isSelected ? (
+                    <>
+                      <div>
+                        <div className="flex justify-between text-xs text-slate-400 mb-1">
+                          <span>Speed</span>
+                          <span>{horse.topSpeed}</span>
+                        </div>
+                        <Progress value={horse.topSpeed} max={100} variant="turf" size="sm" />
+                      </div>
 
-                  <div>
-                    <div className="flex justify-between text-xs text-slate-400 mb-1">
-                      <span>Acceleration</span>
-                      <span>{horse.acceleration}</span>
-                    </div>
-                    <Progress value={horse.acceleration} max={100} variant="turf" size="sm" />
-                  </div>
+                      <div>
+                        <div className="flex justify-between text-xs text-slate-400 mb-1">
+                          <span>Acceleration</span>
+                          <span>{horse.acceleration}</span>
+                        </div>
+                        <Progress value={horse.acceleration} max={100} variant="turf" size="sm" />
+                      </div>
 
-                  <div>
-                    <div className="flex justify-between text-xs text-slate-400 mb-1">
-                      <span>Stamina</span>
-                      <span>{horse.stamina}</span>
-                    </div>
-                    <Progress value={horse.stamina} max={100} variant="turf" size="sm" />
-                  </div>
+                      <div>
+                        <div className="flex justify-between text-xs text-slate-400 mb-1">
+                          <span>Stamina</span>
+                          <span>{horse.stamina}</span>
+                        </div>
+                        <Progress value={horse.stamina} max={100} variant="turf" size="sm" />
+                      </div>
 
-                  <div>
-                    <div className="flex justify-between text-xs text-slate-400 mb-1">
-                      <span>Consistency</span>
-                      <span>{horse.consistency}</span>
-                    </div>
-                    <Progress value={horse.consistency} max={100} variant="turf" size="sm" />
-                  </div>
+                      <div>
+                        <div className="flex justify-between text-xs text-slate-400 mb-1">
+                          <span>Consistency</span>
+                          <span>{horse.consistency}</span>
+                        </div>
+                        <Progress value={horse.consistency} max={100} variant="turf" size="sm" />
+                      </div>
 
-                  <div className="pt-2 border-t border-slate-700">
-                    <p className="text-xs text-slate-400">
-                      Prefers: <span className="text-white capitalize">{horse.trackPreference}</span> track
-                    </p>
-                  </div>
+                      <div className="pt-2 border-t border-slate-700">
+                        <p className="text-xs text-slate-400">
+                          Prefers: <span className="text-white capitalize">{horse.trackPreference}</span> track
+                        </p>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="flex items-center justify-between">
+                      <div className="text-xs text-slate-400">
+                        {horse.totalRaces} races • {Math.round(horse.winRate * 100)}% win rate
+                      </div>
+                      <div className="hidden md:block">
+                        <div className="text-xs text-slate-400 pt-2 border-t border-slate-700">
+                          Prefers: <span className="text-white capitalize">{horse.trackPreference}</span> track
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>

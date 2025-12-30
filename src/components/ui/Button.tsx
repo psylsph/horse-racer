@@ -20,9 +20,9 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     };
     
     const sizeStyles = {
-      sm: 'px-3 py-1.5 text-sm',
-      md: 'px-4 py-2 text-base',
-      lg: 'px-6 py-3 text-lg',
+      sm: 'px-3.5 py-2 text-xs',
+      md: 'px-3 py-2 md:px-4 text-sm md:text-base',
+      lg: 'px-5 py-2.5 md:px-6 text-base md:text-lg',
     };
     
     return (

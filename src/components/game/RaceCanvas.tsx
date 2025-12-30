@@ -77,7 +77,11 @@ export function RaceCanvas({ raceEngine, race }: RaceCanvasProps) {
     };
   }, [raceEngine, race]);
 
-  const laneHeight = (dimensions.height - 60) / 6;
+  const verticalPadding = dimensions.width < 768 ? 15 :
+                        dimensions.width < 1024 ? 20 : 30;
+  const horseScale = dimensions.width < 768 ? 0.75 :
+                   dimensions.width < 1024 ? 0.85 : 1;
+  const laneHeight = (dimensions.height - verticalPadding * 2) / 6;
   const trackPadding = Math.max(20, Math.min(100, dimensions.width * 0.1));
   const trackWidth = dimensions.width - trackPadding * 2;
 
@@ -98,7 +102,7 @@ export function RaceCanvas({ raceEngine, race }: RaceCanvasProps) {
           {Array.from({ length: 6 }).map((_, i) => (
             <Line
               key={`lane-${i}`}
-              points={[0, 30 + i * laneHeight, dimensions.width, 30 + i * laneHeight]}
+              points={[0, verticalPadding + i * laneHeight, dimensions.width, verticalPadding + i * laneHeight]}
               stroke="#ffffff"
               strokeWidth={1}
               opacity={0.3}
@@ -106,7 +110,7 @@ export function RaceCanvas({ raceEngine, race }: RaceCanvasProps) {
           ))}
 
           <Line
-            points={[trackPadding + trackWidth, 30, trackPadding + trackWidth, dimensions.height - 30]}
+            points={[trackPadding + trackWidth, verticalPadding, trackPadding + trackWidth, dimensions.height - verticalPadding]}
             stroke="#ffd700"
             strokeWidth={4}
           />
@@ -121,11 +125,12 @@ export function RaceCanvas({ raceEngine, race }: RaceCanvasProps) {
               <HorseEmojiSprite
                 key={horse.id}
                 x={trackPadding + position * trackWidth}
-                y={30 + index * laneHeight + laneHeight / 2}
+                y={verticalPadding + index * laneHeight + laneHeight / 2}
                 color={horse.color}
                 number={index + 1}
                 finished={isFinished}
                 emoji="🐎"
+                scale={horseScale}
               />
             );
           })}

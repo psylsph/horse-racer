@@ -81,10 +81,10 @@ export function RaceView({ race }: RaceViewProps) {
   return (
     <div className="flex flex-col h-screen">
       {/* Race Header */}
-      <div className="bg-slate-900 border-b border-slate-800 p-4">
+      <div className="bg-slate-900 border-b border-slate-800 p-3 md:p-4">
         <div className="container mx-auto flex items-center justify-between">
           <div>
-            <h2 className="font-display text-2xl font-bold text-white">
+            <h2 className="font-display text-xl md:text-2xl font-bold text-white">
               Race #{race.id.slice(-4)}
             </h2>
             <p className="text-sm text-slate-400">
@@ -114,10 +114,10 @@ export function RaceView({ race }: RaceViewProps) {
       </div>
 
       {/* Race Progress Bar */}
-      <div className="bg-slate-800 border-b border-slate-700 p-2">
+      <div className="bg-slate-800 border-b border-slate-700 p-1.5 md:p-2">
         <div className="container mx-auto">
           <div className="flex items-center gap-4">
-            <span className="text-sm text-slate-400 w-20">Progress</span>
+            <span className="text-sm text-slate-400 w-16 md:w-20">Progress</span>
             <div className="flex-1">
               <Progress value={raceProgress * 100} max={100} variant="turf" showLabel data-testid="progress-bar" />
             </div>
@@ -135,7 +135,7 @@ export function RaceView({ race }: RaceViewProps) {
       </div>
 
       {/* Race Info Footer */}
-      <div className="bg-slate-900 border-t border-slate-800 p-3">
+      <div className="bg-slate-900 border-t border-slate-800 p-2 md:p-3">
         <div className="container mx-auto flex items-center justify-between text-sm">
           <div className="text-slate-400">
             <span className="text-white">{race.horses.length}</span> horses competing
