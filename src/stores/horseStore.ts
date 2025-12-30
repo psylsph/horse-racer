@@ -97,7 +97,6 @@ export const useHorseStore = create<HorseState>()(
       updateHorseStats: (horseId, position) => {
         const horse = get().getHorseById(horseId);
         if (!horse) {
-          console.log(`[HorseStore] Horse ${horseId} not found in store, skipping stats update`);
           return;
         }
         

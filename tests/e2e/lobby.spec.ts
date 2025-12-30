@@ -89,8 +89,11 @@ test.describe('Lobby Screen', () => {
     await page.waitForSelector(SELECTORS.lobbyTitle, { timeout: 5000 });
     await expect(page.locator(SELECTORS.lobbyTitle)).toBeVisible();
 
-    // Select second race
-    await lobbyPage.selectRace(1);
+    // Wait for race cards to be visible
+    await expect(page.locator(SELECTORS.raceCard).first()).toBeVisible();
+
+    // Select first race again (races are regenerated)
+    await lobbyPage.selectRace(0);
     await page.waitForSelector(SELECTORS.formTitle, { timeout: 5000 });
     await expect(page.locator(SELECTORS.formTitle)).toBeVisible();
   });
@@ -144,7 +147,7 @@ test.describe('Lobby Screen', () => {
   });
 
   test('should have correct URL', async ({ page }) => {
-    expect(page.url()).toContain('localhost:3000');
+    expect(page.url()).toContain(':3000');
     expect(page.url()).not.toContain('#');
   });
 

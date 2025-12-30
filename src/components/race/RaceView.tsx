@@ -62,7 +62,7 @@ export function RaceView({ race }: RaceViewProps) {
     return () => {
       // Cleanup
     };
-  }, [race, setCurrentScreen, updateHorseStats, updateRaceResults]);
+  }, [race, setCurrentScreen, updateHorseStats, updateRaceResults, clearBets]);
 
   const handleStartRace = () => {
     if (raceEngine && !isRunning) {

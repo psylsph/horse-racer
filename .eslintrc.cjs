@@ -9,6 +9,15 @@ module.exports = {
   ignorePatterns: ['dist', '.eslintrc.cjs', 'node_modules', 'build', 'coverage', 'test-results', 'playwright-report'],
   parser: '@typescript-eslint/parser',
   plugins: ['react-refresh'],
+  overrides: [
+    {
+      files: ['tests/**/*.{ts,tsx}', '*.spec.ts', '*.test.ts'],
+      rules: {
+        'no-console': 'off',
+        '@typescript-eslint/no-explicit-any': 'off',
+      },
+    },
+  ],
   rules: {
     'react-refresh/only-export-components': [
       'warn',

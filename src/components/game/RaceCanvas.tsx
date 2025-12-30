@@ -42,13 +42,13 @@ export function RaceCanvas({ raceEngine, race }: RaceCanvasProps) {
     const gameLoop = () => {
       if (!isRunning) return;
 
-      const currentFrame = (raceEngine as any).getCurrentFrame?.();
+      const currentPositions = raceEngine.getCurrentPositions();
 
-      if (currentFrame) {
+      if (currentPositions) {
         const newPositions = new Map<string, number>();
         const newFinished = new Set<string>();
 
-        currentFrame.positions.forEach((pos: any) => {
+        currentPositions.forEach((pos) => {
           newPositions.set(pos.horseId, pos.position);
           if (pos.finished) {
             newFinished.add(pos.horseId);

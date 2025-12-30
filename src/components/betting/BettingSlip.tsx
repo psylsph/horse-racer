@@ -5,11 +5,11 @@ import { useGameStore } from '@/stores/gameStore';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { calculateOdds, formatOdds, calculatePayout } from '@/utils/oddsCalculator';
-import { BetType, ECONOMY_CONFIG } from '@/types';
+import { BetType, ECONOMY_CONFIG, Horse, Race } from '@/types';
 
 interface BettingSlipProps {
   raceId: string;
-  horses: any[];
+  horses: Horse[];
 }
 
 export function BettingSlip({ raceId, horses }: BettingSlipProps) {
@@ -21,7 +21,17 @@ export function BettingSlip({ raceId, horses }: BettingSlipProps) {
   const [error, setError] = useState<string>('');
   const [exactaHorse2, setExactaHorse2] = useState<string | null>(null);
 
-  const selectedHorseOdds = selectedHorse ? calculateOdds(selectedHorse as any, { horses } as any) : 0;
+  const mockRace: Race = {
+    id: raceId,
+    horses,
+    trackSurface: 'firm',
+    weather: 'clear',
+    distance: 1200,
+    status: 'scheduled',
+    startTime: Date.now(),
+  };
+
+  const selectedHorseOdds = selectedHorse ? calculateOdds(selectedHorse, mockRace) : 0;
 
   const handleAddBet = () => {
     if (!selectedHorse) {
