@@ -24,24 +24,27 @@ export function HorseEmojiSprite({
         fontSize={40}
         offsetX={20}
         offsetY={20}
+        scaleX={-1}
         opacity={finished ? 0.6 : 1}
       />
-
+ 
       <Circle
-        x={0}
-        y={0}
-        radius={14}
+        x={35}
+        y={-15}
+        radius={12}
         fill={color}
         stroke="white"
         strokeWidth={2}
       />
       <Text
         text={`${number}`}
-        fontSize={14}
+        fontSize={12}
         fontStyle="bold"
         fill="white"
-        offsetX={5}
-        offsetY={7}
+        x={35}
+        y={-15}
+        offsetX={4}
+        offsetY={6}
       />
     </Group>
   );
