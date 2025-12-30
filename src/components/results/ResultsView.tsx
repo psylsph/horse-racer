@@ -1,5 +1,7 @@
 import { Race } from '@/types';
 import { useGameStore } from '@/stores/gameStore';
+import { useBettingStore } from '@/stores/bettingStore';
+import { useWalletStore } from '@/stores/walletStore';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Card, CardContent } from '@/components/ui/Card';
@@ -9,10 +11,31 @@ interface ResultsViewProps {
 }
 
 export function ResultsView({ race }: ResultsViewProps) {
-  const { setCurrentScreen } = useGameStore();
+  const { setCurrentScreen, currentRace } = useGameStore();
+  const { currentBets, settleBets } = useBettingStore();
+  const { updateBalance } = useWalletStore();
 
   const handleBackToLobby = () => {
     setCurrentScreen('lobby');
+  };
+
+  const handleClaimWinnings = () => {
+    if (currentRace?.results && currentBets.length > 0) {
+      const result = settleBets(currentRace.results);
+      updateBalance(result.totalWinnings - result.totalStake);
+    }
+  };
+
+  const getTotalStake = () => {
+    return currentBets.reduce((total, bet) => total + bet.amount, 0);
+  };
+
+  const getWonBetsCount = () => {
+    return currentBets.filter(bet => bet.status === 'won').length;
+  };
+
+  const getLostBetsCount = () => {
+    return currentBets.filter(bet => bet.status === 'lost').length;
   };
 
   if (!race.results || race.results.length === 0) {
@@ -120,6 +143,52 @@ export function ResultsView({ race }: ResultsViewProps) {
           </Card>
         )}
       </div>
+
+      {/* Betting Results */}
+      {currentBets.length > 0 && (
+        <Card variant="elevated" className="border-turf-500 border-2">
+          <CardContent>
+            <h3 className="text-xl font-bold text-white mb-4">Your Bets</h3>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-6">
+                <div>
+                  <p className="text-sm text-slate-400">Total Stake</p>
+                  <p className="text-2xl font-bold text-white">
+                    {getTotalStake().toFixed(2)} credits
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-slate-400">Result</p>
+                  <p className={`text-2xl font-bold ${getTotalStake() > 0 ? 'text-green-400' : 'text-slate-400'}`}>
+                    {getTotalStake() > 0 ? `+${getTotalStake().toFixed(2)}` : getTotalStake().toFixed(2)}
+                  </p>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-slate-700">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-green-500" />
+                    <span className="text-sm text-slate-400">
+                      Won: <span className="text-white font-semibold">{getWonBetsCount()}</span>
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-red-500" />
+                    <span className="text-sm text-slate-400">
+                      Lost: <span className="text-white font-semibold">{getLostBetsCount()}</span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <Button variant="primary" onClick={handleClaimWinnings} className="w-full mt-4" data-testid="claim-winnings-button">
+                Claim Winnings
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <Card variant="elevated">
         <CardContent>

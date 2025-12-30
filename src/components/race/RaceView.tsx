@@ -3,6 +3,7 @@ import { Race } from '@/types';
 import { useGameStore } from '@/stores/gameStore';
 import { useHorseStore } from '@/stores/horseStore';
 import { useBettingStore } from '@/stores/bettingStore';
+import { useWalletStore } from '@/stores/walletStore';
 import { RaceEngine } from '@/game/engine/RaceEngine';
 import { RaceCanvas } from '../game/RaceCanvas';
 import { Button } from '../ui/Button';
@@ -16,7 +17,8 @@ interface RaceViewProps {
 export function RaceView({ race }: RaceViewProps) {
   const { setCurrentScreen, updateRaceResults } = useGameStore();
   const { updateHorseStats } = useHorseStore();
-  const { clearBets } = useBettingStore();
+  const { clearBets, settleBets } = useBettingStore();
+  const { updateBalance } = useWalletStore();
   
   const [raceEngine, setRaceEngine] = useState<RaceEngine | null>(null);
   const [raceProgress, setRaceProgress] = useState(0);
@@ -44,6 +46,12 @@ export function RaceView({ race }: RaceViewProps) {
           updateHorseStats(result.horseId, result.position);
         });
 
+        // Settle bets and calculate winnings
+        const bettingResult = settleBets(results);
+
+        // Update wallet with winnings (add stake back on loss, add net profit on win)
+        updateBalance(bettingResult.totalWinnings);
+
         // Clear bets for new race
         clearBets();
 
@@ -62,7 +70,7 @@ export function RaceView({ race }: RaceViewProps) {
     return () => {
       // Cleanup
     };
-  }, [race, setCurrentScreen, updateHorseStats, updateRaceResults, clearBets]);
+  }, [race, setCurrentScreen, updateHorseStats, updateRaceResults, clearBets, settleBets, updateBalance]);
 
   const handleStartRace = () => {
     if (raceEngine && !isRunning) {

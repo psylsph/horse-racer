@@ -77,12 +77,15 @@ export function RaceCanvas({ raceEngine, race }: RaceCanvasProps) {
     };
   }, [raceEngine, race]);
 
-  const verticalPadding = dimensions.width < 768 ? 15 :
-                        dimensions.width < 1024 ? 20 : 30;
+  const headerFooterSpace = 150;
+  const availableHeight = dimensions.height - headerFooterSpace;
+  const laneHeight = availableHeight / 6;
+  const verticalPadding = Math.max(5, dimensions.height * 0.02);
   const horseScale = dimensions.width < 768 ? 0.75 :
-                   dimensions.width < 1024 ? 0.85 : 1;
-  const laneHeight = (dimensions.height - verticalPadding * 2) / 6;
-  const trackPadding = Math.max(20, Math.min(100, dimensions.width * 0.1));
+                   dimensions.width < 1024 ? 0.85 : 1.0;
+  const maxTrackPadding = dimensions.width < 768 ? 60 :
+                         dimensions.width < 1024 ? 70 : 80;
+  const trackPadding = Math.max(15, Math.min(maxTrackPadding, dimensions.width * 0.08));
   const trackWidth = dimensions.width - trackPadding * 2;
 
   return (

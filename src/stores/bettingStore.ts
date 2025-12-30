@@ -24,6 +24,12 @@ interface BettingState {
   // Update bet status after race
   updateBetStatuses: (raceResults: Race['results']) => void;
 
+  // Settle bets after race and calculate total winnings
+  settleBets: (raceResults: Race['results']) => { totalWinnings: number; totalStake: number; wonBets: number; lostBets: number };
+
+  // Get bet result for settlement
+  getBetResult: (betId: string) => 'won' | 'lost' | 'pending';
+
   // Get total stake
   getTotalStake: () => number;
 
@@ -98,9 +104,9 @@ export const useBettingStore = create<BettingState>((set, get) => ({
 
   updateBetStatuses: (raceResults) => {
     const { currentBets } = get();
-
     const updatedBets = currentBets.map((bet) => {
       let won = false;
+      let winnings = 0;
 
       switch (bet.type) {
         case 'win':
@@ -120,18 +126,30 @@ export const useBettingStore = create<BettingState>((set, get) => ({
           break;
       }
 
+      if (won) {
+        winnings = bet.potentialPayout;
+      }
+
       return {
         ...bet,
         status: (won ? 'won' : 'lost') as 'won' | 'lost',
+        winnings: won ? winnings : 0,
       };
     });
 
     set({ currentBets: updatedBets });
 
-    // Update each bet in storage
     updatedBets.forEach((bet) => {
-      betsStorage.update(bet.id, { status: bet.status as 'won' | 'lost' | 'pending' });
+      betsStorage.update(bet.id, { 
+        status: bet.status as 'won' | 'lost' | 'pending',
+        winnings: bet.winnings || 0,
+      });
     });
+  },
+
+  getBetResult: (betId: string) => {
+    const bet = get().currentBets.find(b => b.id === betId);
+    return bet?.status || 'pending';
   },
 
   getTotalStake: () => {
@@ -143,5 +161,59 @@ export const useBettingStore = create<BettingState>((set, get) => ({
       (total, bet) => total + bet.potentialPayout,
       0
     );
+  },
+
+  settleBets: (raceResults) => {
+    const { currentBets } = get();
+    let totalWinnings = 0;
+    let wonBets = 0;
+    let lostBets = 0;
+
+    const updatedBets = currentBets.map((bet) => {
+      let won = false;
+      let winnings = 0;
+
+      switch (bet.type) {
+        case 'win':
+          won = (raceResults?.[0]?.horseId === bet.horseIds[0]) || false;
+          break;
+        case 'place':
+          won = (raceResults?.slice(0, 2).some((r) => r.horseId === bet.horseIds[0])) || false;
+          break;
+        case 'show':
+          won = (raceResults?.slice(0, 3).some((r) => r.horseId === bet.horseIds[0])) || false;
+          break;
+        case 'exacta':
+          won = (
+            raceResults?.[0]?.horseId === bet.horseIds[0] &&
+            raceResults?.[1]?.horseId === bet.horseIds[1]
+          ) || false;
+          break;
+      }
+
+      if (won) {
+        winnings = bet.potentialPayout;
+        totalWinnings += winnings;
+        wonBets++;
+      } else {
+        lostBets++;
+      }
+
+      return {
+        ...bet,
+        status: (won ? 'won' : 'lost') as 'won' | 'lost',
+      };
+    });
+
+    set({ currentBets: updatedBets });
+
+    const totalStake = updatedBets.reduce((sum, bet) => sum + bet.amount, 0);
+
+    return { totalWinnings, totalStake, wonBets, lostBets };
+  },
+
+  getBetResult: (betId: string) => {
+    const bet = get().currentBets.find(b => b.id === betId);
+    return bet?.status || 'pending';
   },
 }));
