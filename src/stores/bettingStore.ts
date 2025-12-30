@@ -104,6 +104,10 @@ export const useBettingStore = create<BettingState>((set, get) => ({
 
   updateBetStatuses: (raceResults) => {
     const { currentBets } = get();
+    let totalWinnings = 0;
+    let wonBets = 0;
+    let lostBets = 0;
+
     const updatedBets = currentBets.map((bet) => {
       let won = false;
       let winnings = 0;
@@ -128,18 +132,16 @@ export const useBettingStore = create<BettingState>((set, get) => ({
 
       if (won) {
         winnings = bet.potentialPayout;
+        totalWinnings += winnings;
+        wonBets++;
+      } else {
+        lostBets++;
       }
 
       return {
-        id: bet.id,
-        raceId: bet.raceId,
-        type: bet.type,
-        horseIds: bet.horseIds,
-        amount: bet.amount,
-        potentialPayout: bet.potentialPayout,
+        ...bet,
         winnings: won ? winnings : 0,
         status: (won ? 'won' : 'lost') as 'won' | 'lost',
-        placedAt: bet.placedAt,
       };
     });
 
@@ -148,11 +150,6 @@ export const useBettingStore = create<BettingState>((set, get) => ({
     const totalStake = updatedBets.reduce((sum, bet) => sum + bet.amount, 0);
 
     return { totalWinnings, totalStake, wonBets, lostBets };
-  },
-
-  getBetResult: (betId: string) => {
-    const bet = get().currentBets.find(b => b.id === betId);
-    return bet?.status || 'pending';
   },
 
   getBetResult: (betId: string) => {
@@ -209,6 +206,7 @@ export const useBettingStore = create<BettingState>((set, get) => ({
 
       return {
         ...bet,
+        winnings: won ? winnings : 0,
         status: (won ? 'won' : 'lost') as 'won' | 'lost',
       };
     });
@@ -218,10 +216,5 @@ export const useBettingStore = create<BettingState>((set, get) => ({
     const totalStake = updatedBets.reduce((sum, bet) => sum + bet.amount, 0);
 
     return { totalWinnings, totalStake, wonBets, lostBets };
-  },
-
-  getBetResult: (betId: string) => {
-    const bet = get().currentBets.find(b => b.id === betId);
-    return bet?.status || 'pending';
   },
 }));

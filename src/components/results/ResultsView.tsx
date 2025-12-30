@@ -1,7 +1,6 @@
 import { Race } from '@/types';
 import { useGameStore } from '@/stores/gameStore';
 import { useBettingStore } from '@/stores/bettingStore';
-import { useWalletStore } from '@/stores/walletStore';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Card, CardContent } from '@/components/ui/Card';
@@ -11,23 +10,24 @@ interface ResultsViewProps {
 }
 
 export function ResultsView({ race }: ResultsViewProps) {
-  const { setCurrentScreen, currentRace } = useGameStore();
-  const { currentBets, settleBets } = useBettingStore();
-  const { updateBalance } = useWalletStore();
+  const { setCurrentScreen } = useGameStore();
+  const { currentBets, clearBets } = useBettingStore();
 
   const handleBackToLobby = () => {
+    clearBets();
     setCurrentScreen('lobby');
-  };
-
-  const handleClaimWinnings = () => {
-    if (currentRace?.results && currentBets.length > 0) {
-      const result = settleBets(currentRace.results);
-      updateBalance(result.totalWinnings - result.totalStake);
-    }
   };
 
   const getTotalStake = () => {
     return currentBets.reduce((total, bet) => total + bet.amount, 0);
+  };
+
+  const getTotalWinnings = () => {
+    return currentBets.reduce((total, bet) => total + (bet.winnings || 0), 0);
+  };
+
+  const getNetResult = () => {
+    return getTotalWinnings() - getTotalStake();
   };
 
   const getWonBetsCount = () => {
@@ -159,8 +159,8 @@ export function ResultsView({ race }: ResultsViewProps) {
                 </div>
                 <div>
                   <p className="text-sm text-slate-400">Result</p>
-                  <p className={`text-2xl font-bold ${getTotalStake() > 0 ? 'text-green-400' : 'text-slate-400'}`}>
-                    {getTotalStake() > 0 ? `+${getTotalStake().toFixed(2)}` : getTotalStake().toFixed(2)}
+                  <p className={`text-2xl font-bold ${getNetResult() >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                    {getNetResult() >= 0 ? `+${getNetResult().toFixed(2)}` : getNetResult().toFixed(2)}
                   </p>
                 </div>
               </div>
@@ -182,8 +182,8 @@ export function ResultsView({ race }: ResultsViewProps) {
                 </div>
               </div>
 
-              <Button variant="primary" onClick={handleClaimWinnings} className="w-full mt-4" data-testid="claim-winnings-button">
-                Claim Winnings
+              <Button variant="primary" onClick={handleBackToLobby} className="w-full mt-4" data-testid="back-to-lobby-button">
+                Back to Lobby
               </Button>
             </div>
           </CardContent>

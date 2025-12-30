@@ -17,7 +17,7 @@ interface RaceViewProps {
 export function RaceView({ race }: RaceViewProps) {
   const { setCurrentScreen, updateRaceResults } = useGameStore();
   const { updateHorseStats } = useHorseStore();
-  const { clearBets, settleBets } = useBettingStore();
+  const { settleBets } = useBettingStore();
   const { updateBalance } = useWalletStore();
   
   const [raceEngine, setRaceEngine] = useState<RaceEngine | null>(null);
@@ -49,11 +49,8 @@ export function RaceView({ race }: RaceViewProps) {
         // Settle bets and calculate winnings
         const bettingResult = settleBets(results);
 
-        // Update wallet with winnings (add stake back on loss, add net profit on win)
+        // Update wallet with winnings
         updateBalance(bettingResult.totalWinnings);
-
-        // Clear bets for new race
-        clearBets();
 
         // Store results in gameStore
         updateRaceResults(results);
@@ -70,7 +67,7 @@ export function RaceView({ race }: RaceViewProps) {
     return () => {
       // Cleanup
     };
-  }, [race, setCurrentScreen, updateHorseStats, updateRaceResults, clearBets, settleBets, updateBalance]);
+    }, [race, setCurrentScreen, updateHorseStats, updateRaceResults, settleBets, updateBalance]);
 
   const handleStartRace = () => {
     if (raceEngine && !isRunning) {

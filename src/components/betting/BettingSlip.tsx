@@ -46,6 +46,7 @@ export function BettingSlip({ raceId, horses }: BettingSlipProps) {
         horseIds: betType === 'exacta' ? [selectedHorse.id, exactaHorse2!] : [selectedHorse.id],
         amount: betAmount,
         potentialPayout: calculatePayout(betType, selectedHorseOdds, betAmount),
+        winnings: 0,
         status: 'pending',
       },
       balance
@@ -62,6 +63,7 @@ export function BettingSlip({ raceId, horses }: BettingSlipProps) {
       horseIds: betType === 'exacta' ? [selectedHorse.id, exactaHorse2!] : [selectedHorse.id],
       amount: betAmount,
       potentialPayout: calculatePayout(betType, selectedHorseOdds, betAmount),
+      winnings: 0,
       status: 'pending',
     });
 

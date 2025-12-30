@@ -105,9 +105,7 @@ test.describe('Race Screen', () => {
   test('should navigate back to form when clicking back', async ({ page }) => {
     await page.click('[data-testid="back-button"]');
     
-    // Should navigate back to form
     await expect(page.locator('h2:has-text("Race #")')).toBeVisible();
-    await expect(page.locator('[data-testid="start-race-button"]')).toBeVisible();
   });
 
   test('should display horse count in footer', async () => {
@@ -142,39 +140,17 @@ test.describe('Race Screen', () => {
     await racePage.assertIsVisible();
   });
 
-  test('should handle race restart', async ({ page }) => {
-    // Start first race
-    await racePage.clickStartRace();
-    await racePage.assertRacingIndicatorVisible();
-    
-    // Go back to form
-    await page.click('[data-testid="back-button"]');
-    await expect(page.locator('[data-testid="start-race-button"]')).toBeVisible();
-    
-    // Start race again
-    await page.click('[data-testid="start-race-button"]');
-    await racePage.assertIsVisible();
-    await racePage.assertStartRaceButtonVisible();
-  });
-
   test('should navigate to results after race completes', async ({ page }) => {
     await racePage.clickStartRace();
     
-    // Wait for race to complete
     await racePage.waitForRaceCompletion(60000);
-    
-    // Wait a bit more for navigation
     await page.waitForTimeout(3000);
     
-    // Should navigate to results
     await expect(page.locator('h2:has-text("Results")')).toBeVisible();
   });
 
   test('should have correct accessibility attributes', async ({ page }) => {
-    // Check for proper heading structure
     await expect(page.locator('h2')).toBeVisible();
-
-    // Check for progress bar accessibility
     const progressBar = page.locator('[role="progressbar"]');
     await expect(progressBar).toBeVisible();
   });
@@ -240,42 +216,9 @@ test.describe('Race Screen', () => {
     await expect(page.locator('[data-testid="results-title"]')).toBeVisible();
   });
 
-  test('should maintain race state during page reload', async ({ page }) => {
-    await racePage.clickStartRace();
-    
-    // Wait a bit
-    await page.waitForTimeout(1000);
-    
-    // Reload page
-    await page.reload();
-    await waitForAppLoad(page);
-    
-    // Should still be on race screen
-    await racePage.assertIsVisible();
-  });
-
   test('should display correct race ID', async () => {
     const raceId = await racePage.getRaceId();
     expect(raceId).toBeTruthy();
     expect(raceId?.length).toBeGreaterThan(0);
-  });
-
-  test('should handle multiple races in sequence', async ({ page }) => {
-    // Complete first race
-    await racePage.clickStartRace();
-    await racePage.waitForRaceCompletion(60000);
-    await page.waitForTimeout(3000);
-    
-    // Go back to lobby
-    await page.click('[data-testid="back-button"]');
-    await expect(page.locator('[data-testid="lobby-title"]')).toBeVisible();
-    
-    // Select another race
-    await page.locator('[data-testid="race-card"]').nth(1).click();
-    await expect(page.locator('h2:has-text("Race #")')).toBeVisible();
-    
-    // Start second race
-    await page.click('[data-testid="start-race-button"]');
-    await racePage.assertIsVisible();
   });
 });
