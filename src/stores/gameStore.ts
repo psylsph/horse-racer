@@ -1,15 +1,16 @@
 import { create } from 'zustand';
-import { GameScreen, Race, Horse } from '@/types';
+import { GameScreen, Race, Horse, RaceResult } from '@/types';
 
 interface GameState {
   // Current screen
   currentScreen: GameScreen;
   setCurrentScreen: (screen: GameScreen) => void;
-  
+
   // Current race
   currentRace: Race | null;
   setCurrentRace: (race: Race | null) => void;
-  
+  updateRaceResults: (results: RaceResult[]) => void;
+
   // Selected horse
   selectedHorse: Horse | null;
   setSelectedHorse: (horse: Horse | null) => void;
@@ -42,6 +43,10 @@ export const useGameStore = create<GameState>((set) => ({
   setCurrentScreen: (screen) => set({ currentScreen: screen }),
 
   setCurrentRace: (race) => set({ currentRace: race }),
+
+  updateRaceResults: (results) => set((state) => ({
+    currentRace: state.currentRace ? { ...state.currentRace, results } : null,
+  })),
 
   setSelectedHorse: (horse) => set({ selectedHorse: horse }),
 

@@ -14,7 +14,7 @@ interface BettingSlipProps {
 
 export function BettingSlip({ raceId, horses }: BettingSlipProps) {
   const { addBet, removeBet, validateBet, getTotalStake, getTotalPotentialPayout, currentBets } = useBettingStore();
-  const { balance } = useWalletStore();
+  const { balance, updateBalance } = useWalletStore();
   const { selectedHorse } = useGameStore();
   const [betType, setBetType] = useState<BetType>('win');
   const [betAmount, setBetAmount] = useState<number>(ECONOMY_CONFIG.MIN_BET);
@@ -55,6 +55,9 @@ export function BettingSlip({ raceId, horses }: BettingSlipProps) {
       status: 'pending',
     });
 
+    // Deduct bet amount from wallet
+    updateBalance(-betAmount);
+
     setError('');
     setBetAmount(ECONOMY_CONFIG.MIN_BET);
   };
@@ -68,8 +71,8 @@ export function BettingSlip({ raceId, horses }: BettingSlipProps) {
   const potentialProfit = totalPotentialPayout - totalStake;
 
   return (
-    <div className="bg-slate-900/95 backdrop-blur-sm border-t border-slate-800 p-4">
-      <div className="container mx-auto">
+    <div className="fixed bottom-0 left-0 right-0 z-30 bg-slate-900/95 backdrop-blur-sm border-t border-slate-800 p-4 max-h-[35vh] overflow-y-auto">
+      <div className="container mx-auto max-w-2xl">
         <h3 className="text-lg font-bold text-white mb-4" data-testid="betting-slip-title">
           Betting Slip
         </h3>
@@ -245,7 +248,7 @@ export function BettingSlip({ raceId, horses }: BettingSlipProps) {
               <div>
                 <p className="text-sm text-slate-400">Total Stake</p>
                 <p className="text-2xl font-bold text-white" data-testid="total-stake">
-                  {totalStake} credits
+                  {totalStake.toFixed(2)} credits
                 </p>
               </div>
               <div>
@@ -254,7 +257,7 @@ export function BettingSlip({ raceId, horses }: BettingSlipProps) {
                   className={`text-2xl font-bold ${potentialProfit >= 0 ? 'text-green-400' : 'text-red-400'}`}
                   data-testid="potential-return"
                 >
-                  {totalPotentialPayout} credits
+                  {totalPotentialPayout.toFixed(2)} credits
                 </p>
               </div>
             </div>

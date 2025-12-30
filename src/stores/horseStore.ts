@@ -3,24 +3,40 @@ import { persist } from 'zustand/middleware';
 import { Horse } from '@/types';
 import { horsesStorage } from '@/utils/localStorage';
 
+// Realistic horse coat colors
+const HORSE_COLORS = [
+  '#8B4513', // Bay
+  '#4A2C2A', // Black
+  '#A52A2A', // Brown
+  '#D2691E', // Chestnut
+  '#F4A460', // Sorrel
+  '#C0C0C0', // Light Gray
+  '#808080', // Gray
+  '#FFE4B5', // Palomino
+  '#F5F5DC', // Beige
+  '#FFFDD0', // Cream
+  '#3D3635', // Dark Brown
+  '#7B3F00', // Gold/Chestnut Mix
+] as const;
+
 interface HorseState {
   horses: Horse[];
-  
+
   // Add horse
   addHorse: (horse: Horse) => void;
-  
+
   // Update horse
   updateHorse: (horseId: string, updates: Partial<Horse>) => void;
-  
+
   // Get horse by ID
   getHorseById: (horseId: string) => Horse | undefined;
-  
+
   // Get horses for race
   getRaceHorses: (count: number) => Horse[];
-  
+
   // Update horse stats after race
   updateHorseStats: (horseId: string, position: number) => void;
-  
+
   // Reset horses
   reset: () => void;
 }
@@ -125,10 +141,7 @@ function generateHorses(count: number): Horse[] {
     'Amber Glow', 'Topaz Trail', 'Pearl Flash', 'Jade Jumper',
   ];
   
-  const colors = [
-    '#8B4513', '#000000', '#FFFFFF', '#808080', '#D2691E',
-    '#F5DEB3', '#A0522D', '#696969', '#2F4F4F', '#8B0000',
-  ];
+  const colors = HORSE_COLORS;
   
   const trackPreferences: Array<'firm' | 'soft' | 'heavy'> = ['firm', 'soft', 'heavy'];
   

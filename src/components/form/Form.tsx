@@ -27,7 +27,7 @@ export function Form({ race }: FormProps) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-24">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="font-display text-3xl font-bold text-white">
@@ -37,9 +37,14 @@ export function Form({ race }: FormProps) {
             {race.distance}m • {race.trackSurface} • {race.weather}
           </p>
         </div>
-        <Button variant="secondary" onClick={handleBack} data-testid="back-button">
-          ← Back to Lobby
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="secondary" onClick={handleBack} data-testid="back-button">
+            ← Back to Lobby
+          </Button>
+          <Button variant="primary" size="lg" onClick={handleStartRace} data-testid="form-start-race-button">
+            Start Race 🏁
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -126,14 +131,6 @@ export function Form({ race }: FormProps) {
             </Card>
           );
         })}
-      </div>
-
-      <div className="fixed bottom-16 left-0 right-0 bg-slate-900/95 backdrop-blur-sm border-t border-slate-800 p-4">
-        <div className="container mx-auto flex justify-center">
-          <Button variant="primary" size="lg" onClick={handleStartRace} data-testid="form-start-race-button">
-            Start Race 🏁
-          </Button>
-        </div>
       </div>
 
       <BettingSlip raceId={race.id} horses={race.horses} />

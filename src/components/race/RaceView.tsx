@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { Race } from '@/types';
 import { useGameStore } from '@/stores/gameStore';
 import { useHorseStore } from '@/stores/horseStore';
+import { useBettingStore } from '@/stores/bettingStore';
 import { RaceEngine } from '@/game/engine/RaceEngine';
 import { RaceCanvas } from '../game/RaceCanvas';
 import { Button } from '../ui/Button';
@@ -13,8 +14,9 @@ interface RaceViewProps {
 }
 
 export function RaceView({ race }: RaceViewProps) {
-  const { setCurrentScreen } = useGameStore();
+  const { setCurrentScreen, updateRaceResults } = useGameStore();
   const { updateHorseStats } = useHorseStore();
+  const { clearBets } = useBettingStore();
   
   const [raceEngine, setRaceEngine] = useState<RaceEngine | null>(null);
   const [raceProgress, setRaceProgress] = useState(0);
@@ -36,12 +38,18 @@ export function RaceView({ race }: RaceViewProps) {
         // Race finished
         setIsFinished(true);
         setIsRunning(false);
-        
+
         // Update horse stats
         results.forEach(result => {
           updateHorseStats(result.horseId, result.position);
         });
-        
+
+        // Clear bets for new race
+        clearBets();
+
+        // Store results in gameStore
+        updateRaceResults(results);
+
         // Go to results after a delay
         setTimeout(() => {
           setCurrentScreen('results');
@@ -54,7 +62,7 @@ export function RaceView({ race }: RaceViewProps) {
     return () => {
       // Cleanup
     };
-  }, [race, setCurrentScreen, updateHorseStats]);
+  }, [race, setCurrentScreen, updateHorseStats, updateRaceResults]);
 
   const handleStartRace = () => {
     if (raceEngine && !isRunning) {

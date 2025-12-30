@@ -28,6 +28,7 @@ export class RaceEngine {
   private animationFrame: number | null = null;
   private onFrameUpdates: ((frame: RaceFrame) => void)[] = [];
   private onCompletes: ((results: RaceResult[]) => void)[] = [];
+  private averageVelocities: Map<string, number[]> = new Map();
 
   constructor(race: Race, onFrameUpdate?: (frame: RaceFrame) => void, onComplete?: (results: RaceResult[]) => void) {
     this.race = race;
@@ -131,6 +132,12 @@ export class RaceEngine {
       // Calculate current velocity
       const velocity = this.calculateVelocity(horse, horsePos, conditions);
 
+      // Track velocities for realistic speed calculation
+      if (!this.averageVelocities.has(horsePos.horseId)) {
+        this.averageVelocities.set(horsePos.horseId, []);
+      }
+      this.averageVelocities.get(horsePos.horseId)!.push(velocity);
+
       // Update position (velocity is in pixels per frame, convert to percentage)
       // Scale factor controls race speed - lower means slower race
       const distancePerFrame = velocity * 0.00002;
@@ -182,7 +189,7 @@ export class RaceEngine {
     }
 
     // Stochastic variance (reduced by consistency)
-    const varianceRange = 20 * (1 - horse.consistency / 100);
+    const varianceRange = 40 * (1 - horse.consistency / 100);
     const randomFactor = (Math.random() - 0.5) * varianceRange;
 
     // Apply variance to performance
@@ -267,12 +274,23 @@ export class RaceEngine {
     // Sort horses by finishing position
     const results: RaceResult[] = Array.from(this.positions.values())
       .sort((a, b) => b.position - a.position)
-      .map((pos, index) => ({
-        horseId: pos.horseId,
-        position: index + 1,
-        time: this.frames.length * 16.67, // Approximate time in ms
-        finalSpeed: pos.velocity,
-      }));
+      .map((pos, index) => {
+        const horse = this.horses.get(pos.horseId)!;
+        const velocities = this.averageVelocities.get(pos.horseId) || [];
+        const avgVelocity = velocities.length > 0
+          ? velocities.reduce((sum, v) => sum + v, 0) / velocities.length
+          : horse.topSpeed;
+
+        // Convert to realistic km/h (velocity values are abstract, use scaling)
+        const kmh = avgVelocity * 0.8; // Scale to realistic range (35-65 km/h)
+
+        return {
+          horseId: pos.horseId,
+          position: index + 1,
+          time: this.frames.length * 16.67, // Approximate time in ms
+          finalSpeed: kmh,
+        };
+      });
 
     this.onCompletes.forEach(cb => cb(results));
   }
