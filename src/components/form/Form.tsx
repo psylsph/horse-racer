@@ -1,17 +1,22 @@
-import { Race } from '@/types';
+import { Race, Horse } from '@/types';
 import { useGameStore } from '@/stores/gameStore';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Progress } from '@/components/ui/Progress';
 import { Badge } from '@/components/ui/Badge';
 import { calculateOdds, formatOdds } from '@/utils/oddsCalculator';
+import { BettingSlip } from '../betting/BettingSlip';
 
 interface FormProps {
   race: Race;
 }
 
 export function Form({ race }: FormProps) {
-  const { setCurrentScreen } = useGameStore();
+  const { setCurrentScreen, selectedHorse, setSelectedHorse } = useGameStore();
+
+  const handleHorseSelect = (horse: Horse) => {
+    setSelectedHorse(horse);
+  };
 
   const handleStartRace = () => {
     setCurrentScreen('race');
@@ -40,14 +45,19 @@ export function Form({ race }: FormProps) {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {race.horses.map((horse) => {
           const odds = calculateOdds(horse, race);
-          
+          const isSelected = selectedHorse?.id === horse.id;
+
           return (
             <Card
               key={horse.id}
               variant="elevated"
-              className="hover:border-turf-500 transition-colors"
+              onClick={() => handleHorseSelect(horse)}
+              className={`hover:border-turf-500 transition-all cursor-pointer ${
+                isSelected ? 'border-turf-500 ring-2 ring-turf-400' : ''
+              }`}
               data-testid="horse-card"
               data-horse-id={horse.id}
+              aria-pressed={isSelected}
             >
               <CardHeader>
                 <div className="flex items-start justify-between">
@@ -63,10 +73,15 @@ export function Form({ race }: FormProps) {
                       </p>
                     </div>
                   </div>
-                  <Badge variant="gold" data-testid="odds-badge">{formatOdds(odds)}</Badge>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="gold" data-testid="odds-badge">{formatOdds(odds)}</Badge>
+                    {isSelected && (
+                      <Badge variant="success" data-testid="selected-badge">Selected</Badge>
+                    )}
+                  </div>
                 </div>
               </CardHeader>
-              
+
               <CardContent data-testid="horse-stats">
                 <div className="space-y-3">
                   <div>
@@ -76,7 +91,7 @@ export function Form({ race }: FormProps) {
                     </div>
                     <Progress value={horse.topSpeed} max={100} variant="turf" size="sm" />
                   </div>
-                  
+
                   <div>
                     <div className="flex justify-between text-xs text-slate-400 mb-1">
                       <span>Acceleration</span>
@@ -84,7 +99,7 @@ export function Form({ race }: FormProps) {
                     </div>
                     <Progress value={horse.acceleration} max={100} variant="turf" size="sm" />
                   </div>
-                  
+
                   <div>
                     <div className="flex justify-between text-xs text-slate-400 mb-1">
                       <span>Stamina</span>
@@ -92,7 +107,7 @@ export function Form({ race }: FormProps) {
                     </div>
                     <Progress value={horse.stamina} max={100} variant="turf" size="sm" />
                   </div>
-                  
+
                   <div>
                     <div className="flex justify-between text-xs text-slate-400 mb-1">
                       <span>Consistency</span>
@@ -100,7 +115,7 @@ export function Form({ race }: FormProps) {
                     </div>
                     <Progress value={horse.consistency} max={100} variant="turf" size="sm" />
                   </div>
-                  
+
                   <div className="pt-2 border-t border-slate-700">
                     <p className="text-xs text-slate-400">
                       Prefers: <span className="text-white capitalize">{horse.trackPreference}</span> track
@@ -120,6 +135,8 @@ export function Form({ race }: FormProps) {
           </Button>
         </div>
       </div>
+
+      <BettingSlip raceId={race.id} horses={race.horses} />
     </div>
   );
 }

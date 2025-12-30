@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { clearLocalStorage, waitForAppLoad } from '../helpers/test-utils';
+import { waitForAppLoad } from '../helpers/test-utils';
 
 test.describe('Performance Tests', () => {
   test('should load initial page within time limit', async ({ page, context }) => {

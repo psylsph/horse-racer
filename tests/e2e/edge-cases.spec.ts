@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { clearLocalStorage, waitForAppLoad, seedTestData } from '../helpers/test-utils';
+import { waitForAppLoad, seedTestData } from '../helpers/test-utils';
 
 test.describe('Edge Cases and Error Scenarios', () => {
   test('should handle no races available', async ({ page, context }) => {

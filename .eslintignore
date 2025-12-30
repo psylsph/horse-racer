@@ -1,0 +1,8 @@
+dist
+dist-ssr
+node_modules
+build
+coverage
+*.local
+test-results
+playwright-report

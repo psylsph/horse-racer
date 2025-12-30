@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { clearLocalStorage, waitForAppLoad, SELECTORS } from '../helpers/test-utils';
+import { waitForAppLoad, SELECTORS } from '../helpers/test-utils';
 
 test.describe('Full User Flow', () => {
   test('should complete full race flow from lobby to results', async ({ page, context }) => {

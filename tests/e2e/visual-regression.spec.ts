@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { clearLocalStorage, waitForAppLoad } from '../helpers/test-utils';
+import { waitForAppLoad } from '../helpers/test-utils';
 
 test.describe('Visual Regression Tests', () => {
   test.beforeEach(async ({ page, context }) => {

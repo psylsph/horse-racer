@@ -121,6 +121,7 @@ export function RaceView({ race }: RaceViewProps) {
       <div className="flex-1 relative" ref={canvasRef}>
         <RaceCanvas
           raceEngine={raceEngine}
+          race={race}
           data-testid="race-canvas"
         />
       </div>

@@ -125,7 +125,7 @@ describe('RaceEngine', () => {
     });
 
     it('should update horse positions over time', () => {
-      let frames: any[] = [];
+      const frames: any[] = [];
       
       engine = new RaceEngine(
         race,
@@ -318,14 +318,10 @@ describe('RaceEngine', () => {
 
   describe('Race Completion', () => {
     it('should mark horses as finished when they reach 1', () => {
-      // @ts-ignore - variable is used in callback
-      let allFinished = false;
-
       engine = new RaceEngine(
         race,
         () => {},
         (results) => {
-          allFinished = true;
           
           // Check results are valid
           expect(results).toHaveLength(3);

@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { clearLocalStorage, waitForAppLoad, selectRace } from '../helpers/test-utils';
+import { waitForAppLoad, selectRace } from '../helpers/test-utils';
 
 test.describe('Results Screen', () => {
   test.beforeEach(async ({ page, context }) => {

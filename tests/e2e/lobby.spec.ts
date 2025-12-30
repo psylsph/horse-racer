@@ -30,29 +30,29 @@ test.describe('Lobby Screen', () => {
     await expect(page.locator('text=Live')).toBeVisible();
   });
 
-  test('should display race cards', async ({ page }) => {
+  test('should display race cards', async () => {
     const raceCount = await lobbyPage.getRaceCount();
     expect(raceCount).toBeGreaterThan(0);
   });
 
-  test('should display 5 race cards by default', async ({ page }) => {
+  test('should display 5 race cards by default', async () => {
     const raceCount = await lobbyPage.getRaceCount();
     expect(raceCount).toBe(5);
   });
 
-  test('should display race card with required information', async ({ page }) => {
+  test('should display race card with required information', async () => {
     const raceDetails = await lobbyPage.getRaceDetails(0);
-    
+
     // Check that race card has content
     expect(raceDetails.text.length).toBeGreaterThan(0);
-    
+
     // Check for race ID
     expect(raceDetails.id).toBeTruthy();
   });
 
   test('should navigate to form when clicking race card', async ({ page }) => {
     await lobbyPage.selectRace(0);
-    
+
     // Wait for navigation to form screen
     await page.waitForSelector(SELECTORS.formTitle, { timeout: 5000 });
     
@@ -79,18 +79,16 @@ test.describe('Lobby Screen', () => {
   });
 
   test('should handle race selection for different races', async ({ page }) => {
-    const raceCount = await lobbyPage.getRaceCount();
-    
     // Select first race
     await lobbyPage.selectRace(0);
     await page.waitForSelector(SELECTORS.formTitle, { timeout: 5000 });
     await expect(page.locator(SELECTORS.formTitle)).toBeVisible();
-    
+
     // Go back to lobby
     await page.click(SELECTORS.backButton);
     await page.waitForSelector(SELECTORS.lobbyTitle, { timeout: 5000 });
     await expect(page.locator(SELECTORS.lobbyTitle)).toBeVisible();
-    
+
     // Select second race
     await lobbyPage.selectRace(1);
     await page.waitForSelector(SELECTORS.formTitle, { timeout: 5000 });

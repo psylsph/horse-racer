@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { clearLocalStorage, waitForAppLoad } from '../helpers/test-utils';
+import { waitForAppLoad } from '../helpers/test-utils';
 
 test.describe('Accessibility Tests', () => {
   test.beforeEach(async ({ page, context }) => {
@@ -140,9 +140,8 @@ test.describe('Accessibility Tests', () => {
 
   test('should handle screen reader announcements', async ({ page }) => {
     // Check for live regions that announce changes
-    const liveRegions = page.locator('[aria-live], [role="status"]');
-    const count = await liveRegions.count();
-    
+    page.locator('[aria-live], [role="status"]');
+
     // Should have at least one live region for race status
     await page.locator('[data-testid="race-card"]').first().click();
     await page.click('[data-testid="start-race-button"]');
@@ -153,9 +152,8 @@ test.describe('Accessibility Tests', () => {
 
   test('should have proper button states', async ({ page }) => {
     // Check disabled states
-    const raceCards = page.locator('[data-testid="race-card"]');
-    const firstCard = raceCards.first();
-    
+    page.locator('[data-testid="race-card"]');
+
     // Check if any buttons are disabled
     const buttons = page.locator('button');
     const buttonCount = await buttons.count();
@@ -235,11 +233,12 @@ test.describe('Accessibility Tests', () => {
 
   test('should have proper skip links', async ({ page }) => {
     // Check for skip navigation links (best practice)
-    const skipLinks = page.locator('a[href^="#"], a[href*="skip"]');
-    const count = await skipLinks.count();
-    
+    page.locator('a[href^="#"], a[href*="skip"]');
+
     // This is optional but recommended for accessibility
-    // For now, we just verify the page loads without errors
+    // For now, we just verify page loads without errors
     await expect(page.locator('#root')).toBeVisible();
-  });
+
 });
+}
+);

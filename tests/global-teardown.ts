@@ -4,7 +4,7 @@ import { FullConfig } from '@playwright/test';
  * Global teardown for Playwright tests
  * This runs once after all tests
  */
-async function globalTeardown(config: FullConfig) {
+async function globalTeardown(_config: FullConfig) {
   console.log('✅ Playwright test suite completed');
 }
 

@@ -1,10 +1,13 @@
 import { useGameStore } from './stores/gameStore';
+import { useWalletStore } from './stores/walletStore';
 import { Lobby } from './components/lobby/Lobby';
 import { Form } from './components/form/Form';
 import { RaceView } from './components/race/RaceView';
+import { ResultsView } from './components/results/ResultsView';
 
 function App() {
   const { currentScreen, currentRace } = useGameStore();
+  const { balance } = useWalletStore();
   
   return (
     <div className="min-h-screen bg-slate-950 text-white">
@@ -16,9 +19,8 @@ function App() {
               TURF SPRINT
             </h1>
             <div className="flex items-center gap-4">
-              {/* Wallet balance will be added here */}
               <div className="text-sm text-slate-400">
-                Balance: <span className="text-gold-400 font-mono">1,000</span> credits
+                Balance: <span className="text-gold-400 font-mono" data-testid="wallet-balance">{balance}</span> credits
               </div>
             </div>
           </div>
@@ -38,15 +40,8 @@ function App() {
             <RaceView race={currentRace} />
           )}
           
-          {currentScreen === 'results' && (
-            <div className="text-center py-20">
-              <h2 data-testid="results-title" className="font-display text-4xl font-bold mb-4">
-                Results
-              </h2>
-              <p className="text-slate-400 text-lg">
-                Coming soon...
-              </p>
-            </div>
+          {currentScreen === 'results' && currentRace && (
+            <ResultsView race={currentRace} />
           )}
           
           {currentScreen === 'photo-finish' && (

@@ -2,8 +2,8 @@ import { Page, expect } from '@playwright/test';
 import { SELECTORS } from '../test-utils';
 
 /**
- * Page object for the Form (race details) screen
- * Encapsulates all interactions and assertions for the form
+ * Page object for Form (race details) screen
+ * Encapsulates all interactions and assertions for form
  */
 export class FormPage {
   constructor(private page: Page) {}
@@ -30,7 +30,7 @@ export class FormPage {
   async getRaceDetails() {
     const titleText = await this.page.locator('h2').textContent();
     const detailsText = await this.page.locator('p.text-slate-400').textContent();
-    
+
     return {
       title: titleText || '',
       details: detailsText || '',
@@ -50,12 +50,12 @@ export class FormPage {
    */
   async getHorseDetails(index: number) {
     const horseCard = this.page.locator(SELECTORS.horseCard).nth(index);
-    
+
     const name = await horseCard.locator(SELECTORS.horseName).textContent();
     const odds = await horseCard.locator(SELECTORS.oddsBadge).textContent();
     const races = await horseCard.locator('text=races').textContent();
     const winRate = await horseCard.locator('text=% win rate').textContent();
-    
+
     return {
       name: name || '',
       odds: odds || '',
@@ -70,10 +70,9 @@ export class FormPage {
   async getHorseStats(index: number) {
     const horseCard = this.page.locator(SELECTORS.horseCard).nth(index);
     const stats = horseCard.locator(SELECTORS.horseStats);
-    
-    const statLabels = await stats.locator('span:first-child').allTextContents();
+
     const statValues = await stats.locator('span:last-child').allTextContents();
-    
+
     return {
       speed: statValues[0] || '0',
       acceleration: statValues[1] || '0',
@@ -87,7 +86,7 @@ export class FormPage {
    */
   async assertHorseStatsValid(index: number) {
     const stats = await this.getHorseStats(index);
-    
+
     expect(parseInt(stats.speed)).toBeGreaterThanOrEqual(0);
     expect(parseInt(stats.speed)).toBeLessThanOrEqual(100);
     expect(parseInt(stats.acceleration)).toBeGreaterThanOrEqual(0);

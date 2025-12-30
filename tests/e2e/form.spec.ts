@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { clearLocalStorage, waitForAppLoad, selectRace, SELECTORS } from '../helpers/test-utils';
+import { waitForAppLoad, selectRace, SELECTORS } from '../helpers/test-utils';
 import { FormPage } from '../helpers/page-objects/FormPage';
 
 test.describe('Form Screen', () => {
@@ -36,12 +36,12 @@ test.describe('Form Screen', () => {
     expect(detailsText).toBeTruthy();
   });
 
-  test('should display horse cards', async ({ page }) => {
+  test('should display horse cards', async () => {
     const horseCount = await formPage.getHorseCount();
     expect(horseCount).toBeGreaterThan(0);
   });
 
-  test('should display horse with required information', async ({ page }) => {
+  test('should display horse with required information', async () => {
     const horseDetails = await formPage.getHorseDetails(0);
 
     expect(horseDetails.name).toBeTruthy();
@@ -50,12 +50,12 @@ test.describe('Form Screen', () => {
     expect(horseDetails.winRate).toBeTruthy();
   });
 
-  test('should display valid horse stats', async ({ page }) => {
+  test('should display valid horse stats', async () => {
     await formPage.assertHorseStatsValid(0);
     await formPage.assertHorseStatsValid(1);
   });
 
-  test('should display horse stats in correct range', async ({ page }) => {
+  test('should display horse stats in correct range', async () => {
     const stats = await formPage.getHorseStats(0);
 
     const speed = parseInt(stats.speed);
@@ -73,16 +73,16 @@ test.describe('Form Screen', () => {
     expect(consistency).toBeLessThanOrEqual(100);
   });
 
-  test('should display odds badge', async ({ page }) => {
+  test('should display odds badge', async () => {
     const horseDetails = await formPage.getHorseDetails(0);
     expect(horseDetails.odds).toMatch(/\d+\/\d+|\d+\.\d+/);
   });
 
-  test('should display start race button', async ({ page }) => {
+  test('should display start race button', async () => {
     await formPage.assertStartRaceButtonVisible();
   });
 
-  test('should display back button', async ({ page }) => {
+  test('should display back button', async () => {
     await formPage.assertBackButtonVisible();
   });
 
